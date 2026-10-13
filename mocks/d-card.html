@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>D · Card</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=JetBrains+Mono:wght@400;500&family=VT323&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="_shared.css">
+<style>
+body { background: #f2efe9; color: #1d1b18; font: 16px/1.5 var(--sans); min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.card { width: min(440px, 100%); background: #fbfaf7; border: 1px solid #e3ded4; border-radius: 22px; padding: 36px 32px; box-shadow: 0 30px 60px -30px rgba(40,30,20,.25); }
+h1 { font: 400 46px/1 var(--serif); }
+.line { color: #6f6a61; margin-top: 10px; }
+ul { list-style: none; margin-top: 28px; border-top: 1px solid #ebe6dc; }
+li a, li span.row { display: flex; justify-content: space-between; align-items: center; padding: 15px 2px; border-bottom: 1px solid #ebe6dc; }
+li a:hover b { text-decoration: underline; text-underline-offset: 4px; }
+li b { font-weight: 600; } li i { font-style: normal; color: #8a8478; font-size: 14px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 10px; }
+.mail { display: block; margin-top: 24px; font: 14px var(--mono); color: #6f6a61; }
+</style></head><body>
+<div class="card">
+  <h1>Ivo Lopes</h1>
+  <p class="line">Quality engineer, ceramicist, DJ, performer. Porto.</p>
+  <ul>
+    <li><a href="https://qa.ivolopes.com"><b><span class="dot" style="background:#0a8f5a"></span>QA</b><i>quality engineering · CV ↗</i></a></li>
+    <li><a href="https://art.ivolopes.com"><b><span class="dot" style="background:#c46a3c"></span>Art</b><i>ceramics ↗</i></a></li>
+    <li><a href="https://moss.ivolopes.com"><b><span class="dot" style="background:#3a8f3f"></span>MOSS</b><i>dj · producer ↗</i></a></li>
+    <li><span class="row soon"><b><span class="dot" style="background:#c9a640"></span>Stage</b><i>dance · acting · soon</i></span></li>
+  </ul>
+  <a class="mail" href="mailto:mail@ivolopes.com">mail@ivolopes.com</a>
+</div>
+</body></html>

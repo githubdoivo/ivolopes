@@ -22,7 +22,8 @@
   @media (pointer: fine) { html, body, a { cursor: none; } }
   a { color: inherit; text-decoration: none; }
 
-  .stage { position: fixed; left: 50%; top: 50%; --h: 900px; }
+  .stage { position: fixed; left: 50%; top: 50%; }
+  .view { position: fixed; inset: 0; --h: 100vh; }
   .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; animation: drift 40s ease-in-out infinite alternate; }
   @keyframes drift { from { transform: scale(1.01) translate(.15%, .1%); } to { transform: scale(1.035) translate(-.25%, -.2%); } }
 
@@ -97,6 +98,8 @@
 
 <div class="stage" id="stage">
   <img class="plate" id="plate" alt="" aria-hidden="true">
+</div>
+<div class="view" id="view">
   <div class="bloom" id="bloom" aria-hidden="true"><img id="flower" alt=""><div class="scan-b" id="scanb"></div></div>
   <div class="hud" id="hud"></div>
 </div>
@@ -157,7 +160,7 @@
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const q = new URLSearchParams(location.search);
   const frozen = q.has("t") ? +q.get("t") : null;
-  let L = null, S = 1, SW = 0, SH = 0;
+  let L = null, S = 1, SW = 0, SH = 0, VW = 0, VH = 0;
 
   function build() {
     const want = innerWidth / innerHeight < .8 ? LAYOUT.phone : LAYOUT.desk;
@@ -165,7 +168,9 @@
     S = Math.max(innerWidth / want.w, innerHeight / want.h);
     SW = want.w * S; SH = want.h * S;
     Object.assign(stage.style, { width: `${SW}px`, height: `${SH}px`, marginLeft: `${-SW / 2}px`, marginTop: `${-SH / 2}px` });
-    stage.style.setProperty("--h", `${SH}px`);
+    // The HUD and bloom follow the visible screen (minus safe areas), not the cropped plate.
+    VW = innerWidth; VH = innerHeight;
+    $("view").style.setProperty("--h", `${VH}px`);
     if (want === L) return place();
     L = want;
     $("plate").src = L.plate; $("flower").src = L.flower;
@@ -185,25 +190,25 @@
     place();
   }
   function place() {
-    const b = L.bloom, size = b.size * SH;
-    Object.assign($("bloom").style, { left: `${b.x * SW}px`, top: `${b.y * SH}px`, width: `${size}px`, height: `${size}px` });
+    const b = L.bloom, size = b.size * VH;
+    Object.assign($("bloom").style, { left: `${b.x * VW}px`, top: `${b.y * VH}px`, width: `${size}px`, height: `${size}px` });
     const [mx, my, mw] = L.meter;
-    Object.assign($("meter").style, { left: `${mx * SW}px`, top: `${my * SH}px`, width: `${mw * SW}px` });
+    Object.assign($("meter").style, { left: `${mx * VW}px`, top: `${my * VH}px`, width: `${mw * VW}px` });
     const [wx, wy, ww, wh] = L.wave, wave = $("wave"), pr = Math.min(devicePixelRatio || 1, 2);
-    wave.width = ww * SW * pr; wave.height = wh * SH * pr;
-    Object.assign(wave.style, { left: `${wx * SW}px`, top: `${(wy - wh / 2) * SH}px`, width: `${ww * SW}px`, height: `${wh * SH}px` });
+    wave.width = ww * VW * pr; wave.height = wh * VH * pr;
+    Object.assign(wave.style, { left: `${wx * VW}px`, top: `${(wy - wh / 2) * VH}px`, width: `${ww * VW}px`, height: `${wh * VH}px` });
   }
   addEventListener("resize", build);
   build();
 
   /* ---------- Lines that follow the bloom ---------- */
   function bloomBox() {
-    const r = $("bloom").getBoundingClientRect(), s = $("stage").getBoundingClientRect();
-    return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, size: r.width };
+    const r = $("bloom").getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, size: r.width };
   }
   function lines(t) {
     const B = bloomBox(), G = (a) => `rgba(200,248,187,${a})`;
-    const R = L.ring.r * SH;
+    const R = L.ring.r * VH, SW = VW, SH = VH;
     let h = `<circle cx="${B.x}" cy="${B.y}" r="${R}" fill="none" stroke="${G(.5)}" stroke-width="1" stroke-dasharray="1.2 6"/>`;
     // the ring's scanning arc
     const a0 = t * .35, a1 = a0 + .9;

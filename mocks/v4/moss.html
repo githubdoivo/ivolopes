@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MOSS · signal acquired</title>
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }</script>
+<style>
+  :root { --g: #a8f0a0; --g2: rgba(168, 240, 160, .62); --g3: rgba(168, 240, 160, .32); --mono: "Share Tech Mono", ui-monospace, monospace; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { color: var(--g); font: 13px/1.35 var(--mono); -webkit-font-smoothing: antialiased; touch-action: none; }
+  a { color: inherit; text-decoration: none; }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* The HUD, projected on the visor. */
+  .hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 0 8px rgba(140, 255, 140, .45); opacity: 0; transition: opacity 1.6s .4s; }
+  .hud.on { opacity: 1; }
+  .hud a { pointer-events: auto; }
+  .blk { position: absolute; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+  .blk.r { text-align: right; }
+  .data { font-size: 12.5px; line-height: 1.45; color: var(--g); }
+  .data span { display: inline-block; min-width: 3.4em; color: var(--g2); }
+  .plus { position: absolute; width: 14px; height: 14px; }
+  .plus::before, .plus::after { content: ""; position: absolute; background: var(--g2); }
+  .plus::before { left: 6.5px; top: 0; width: 1px; height: 14px; } .plus::after { top: 6.5px; left: 0; height: 1px; width: 14px; }
+  .wordmark { font-size: clamp(44px, 4.6vw, 70px); letter-spacing: .62em; line-height: 1; text-shadow: 0 0 14px rgba(140, 255, 140, .6), 0 0 40px rgba(120, 255, 140, .25); }
+  .role { margin-top: 18px; font-size: clamp(13px, 1.25vw, 18px); letter-spacing: .62em; color: var(--g); }
+  .tx { margin-top: 40px; font-size: clamp(13px, 1.15vw, 16px); letter-spacing: .26em; }
+  .meter { display: flex; gap: 2px; margin-top: 10px; align-items: center; }
+  .meter i { width: 4px; height: 7px; background: var(--g); opacity: .9; }
+  .meter i.off { opacity: .18; }
+  .meter b { width: 1px; height: 9px; background: var(--g2); margin-left: 70px; }
+  .mail { display: inline-flex; gap: 10px; align-items: center; margin-top: 34px; font-size: 13px; letter-spacing: .14em; }
+  .mail:hover { color: #fff; }
+  .mail::before { content: ""; width: 0; height: 0; border-left: 8px solid var(--g2); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .callout { font-size: 12px; line-height: 1.5; letter-spacing: .14em; color: var(--g); }
+  .bracket { padding: 2px 10px; border-left: 1px solid var(--g2); font-size: 11px; line-height: 1.4; color: var(--g2); }
+  .blk.r .bracket { border-left: 0; border-right: 1px solid var(--g2); }
+  #lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  #lines * { vector-effect: non-scaling-stroke; }
+  #wave { position: absolute; display: block; }
+  .bpm { font-size: 12px; letter-spacing: .14em; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* Phone */
+  @media (max-width: 760px) {
+    .wordmark { font-size: 40px; letter-spacing: .5em; text-indent: .5em; }
+    .role { font-size: 12px; letter-spacing: .5em; margin-top: 12px; }
+    .tx { margin-top: 22px; font-size: 12px; }
+    .data { font-size: 10.5px; }
+    .callout { display: none; }
+    .mail { margin-top: 0; font-size: 11px; }
+    .mail::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="view" aria-hidden="true"></canvas>
+<main class="sr"><h1>MOSS</h1><p>DJ and producer. Transmission soon. Contact: mail@ivolopes.com</p></main>
+
+<div class="hud" id="hud">
+  <svg id="lines" aria-hidden="true"></svg>
+  <div class="blk data" id="geo" aria-hidden="true"><div><span>LAT</span><b id="lat">23.9°</b></div><div><span>LON</span><b id="lon">146.7°</b></div><div><span>DIST</span><b>1.8 AU</b></div></div>
+  <div class="blk data r" id="cam" aria-hidden="true"><div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div></div>
+  <div class="plus" id="p1"></div><div class="plus" id="p2"></div><div class="plus" id="p3"></div><div class="plus" id="p4"></div>
+
+  <div class="blk" id="brand">
+    <div class="wordmark" aria-hidden="true">MOSS</div>
+    <div class="role">DJ · PRODUCER</div>
+    <div class="tx">TRANSMISSION · SOON</div>
+    <div class="meter" id="meter" aria-hidden="true"></div>
+    <a class="mail" href="mailto:mail@ivolopes.com">MAIL@IVOLOPES.COM</a>
+  </div>
+
+  <div class="blk callout" id="c1" aria-hidden="true">BLOOM 01 · CERAMIC<br>SPECIMEN A<br>ORIGIN UNKNOWN</div>
+  <div class="blk callout" id="c2" aria-hidden="true">MOSS · COVERAGE <b id="cov">100</b>%<br>SYMBIOTIC GROWTH<br>STABLE</div>
+
+  <div class="blk" id="bl" aria-hidden="true"><div class="bracket">AUDIO<br>LIVE FEED<br>STABLE</div></div>
+  <div class="blk r" id="br" aria-hidden="true"><div class="bracket">SPECIMEN<br>BIOSCAN<br>V.1.0</div></div>
+  <canvas id="wave" aria-hidden="true"></canvas>
+  <div class="blk bpm" id="bpm" aria-hidden="true">124 BPM</div>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const q = new URLSearchParams(location.search);
+const frozen = q.has("t") ? +q.get("t") : null;
+const $ = (s) => document.querySelector(s);
+let phone = innerWidth < 760;
+
+/* ---------- Small helpers: seeded random, value noise ---------- */
+let seed = 11;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+const between = (a, b) => a + rnd() * (b - a);
+function hash3(x, y, z) { const s = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return s - Math.floor(s); }
+function noise3(x, y, z) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z), xf = x - xi, yf = y - yi, zf = z - zi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf), w = zf * zf * (3 - 2 * zf);
+  const L = (a, b, t) => a + (b - a) * t, h = (i, j, k) => hash3(xi + i, yi + j, zi + k);
+  return L(L(L(h(0, 0, 0), h(1, 0, 0), u), L(h(0, 1, 0), h(1, 1, 0), u), v), L(L(h(0, 0, 1), h(1, 0, 1), u), L(h(0, 1, 1), h(1, 1, 1), u), v), w) * 2 - 1;
+}
+const fbm = (x, y, z) => noise3(x, y, z) * 0.6 + noise3(x * 2.1, y * 2.1, z * 2.1) * 0.3 + noise3(x * 4.3, y * 4.3, z * 4.3) * 0.1;
+
+/* ---------- Renderer, scene, camera ---------- */
+const canvas = $("#view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 200);
+
+/* ---------- Deep space: nebula, lightning filaments, stars ---------- */
+const NOISE = `
+vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;} vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);} vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){ const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
+  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx); vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy; i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx; vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
+  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y); vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0)); vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3))); p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
+  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3))); }
+float fbm(vec3 p){ float s=0.0,a=0.5; for(int i=0;i<5;i++){ s+=a*snoise(p); p*=2.03; a*=0.5; } return s; }
+float ridge(vec3 p){ float s=0.0,a=0.5; for(int i=0;i<4;i++){ s+=a*pow(1.0-abs(snoise(p)),6.0); p*=2.1; a*=0.5; } return s; }`;
+const sky = new THREE.Mesh(new THREE.SphereGeometry(80, 64, 32), new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false,
+  uniforms: { uTime: { value: 0 } },
+  vertexShader: `varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform float uTime; varying vec3 vD; ${NOISE}
+    float star(vec3 d, float s){ vec3 g = d * s; vec3 id = floor(g); vec3 f = fract(g) - 0.5; float h = fract(sin(dot(id, vec3(12.9, 78.2, 37.7))) * 43758.5);
+      return step(0.975, h) * smoothstep(0.12, 0.0, length(f)) * (0.6 + 0.4 * sin(uTime * 2.0 + h * 80.0)); }
+    void main(){
+      vec3 d = normalize(vD); vec3 p = d * 3.6 + vec3(0.0, 0.0, uTime * 0.004);
+      float n = fbm(p), m = fbm(p * 1.8 + n * 1.4 + 3.0);
+      vec3 col = vec3(0.004, 0.008, 0.01);
+      col += vec3(0.015, 0.10, 0.09) * smoothstep(0.0, 0.9, m) * (0.4 + n);              // teal gas
+      col += vec3(0.11, 0.03, 0.17) * smoothstep(0.2, 0.95, n) * smoothstep(-0.2, 0.6, m); // violet gas
+      float fil = ridge(p * 1.6 + m * 0.8);                                              // electric filaments
+      col += vec3(0.55, 0.32, 0.9) * pow(fil, 2.4) * smoothstep(0.15, 0.75, n) * 0.75;
+      col += vec3(0.25, 0.75, 0.6) * pow(ridge(p * 2.4 - 7.0), 3.0) * smoothstep(0.2, 0.8, m) * 0.35;
+      col += vec3(0.9, 0.95, 1.0) * (star(d, 160.0) + star(d, 320.0) * 0.7 + star(d, 640.0) * 0.5 + star(d, 1100.0) * 0.35);
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+}));
+scene.add(sky);
+
+/* ---------- Lights ---------- */
+scene.add(new THREE.AmbientLight(0x8fb8b0, 0.35));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.6); key.position.set(-3, 4, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0xb48cff, 1.3); rim.position.set(4, 2, -4); scene.add(rim);
+const fill = new THREE.DirectionalLight(0x6fd6c6, 0.35); fill.position.set(2, -3, 3); scene.add(fill);
+
+/* ---------- A distant planet ---------- */
+const planet = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.ShaderMaterial({
+  uniforms: { uTime: { value: 0 } },
+  vertexShader: `varying vec3 vN, vP, vW; void main(){ vP = position; vN = normalize(mat3(modelMatrix) * normal); vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+  fragmentShader: `uniform float uTime; varying vec3 vN, vP, vW; ${NOISE}
+    void main(){
+      vec3 p = normalize(vP); float lat = p.y + fbm(p * 3.0) * 0.08;
+      vec3 c = mix(vec3(0.05, 0.12, 0.13), vec3(0.12, 0.2, 0.22), sin(lat * 18.0) * 0.5 + 0.5);
+      c = mix(c, vec3(0.2, 0.12, 0.28), smoothstep(0.3, 0.7, fbm(p * 2.0 + 4.0)) * 0.5);
+      vec3 N = normalize(vN), L = normalize(vec3(-0.8, 0.5, 0.4)), V = normalize(cameraPosition - vW);
+      float nl = dot(N, L);
+      vec3 col = c * (0.02 + 0.55 * smoothstep(-0.1, 1.0, nl));
+      float rimA = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+      col += vec3(0.35, 0.8, 0.75) * rimA * smoothstep(-0.3, 0.6, nl) * 0.9 + vec3(0.4, 0.2, 0.7) * rimA * 0.25;
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+}));
+scene.add(planet);
+
+/* ---------- The specimen ---------- */
+const specimen = new THREE.Group();
+scene.add(specimen);
+
+// Glazed, speckled, slightly crazed ceramic for the petals.
+function petalTexture() {
+  const c = document.createElement("canvas"); c.width = c.height = 512;
+  const g = c.getContext("2d");
+  const grd = g.createRadialGradient(256, 380, 20, 256, 300, 300);
+  grd.addColorStop(0, "#f4f0e2"); grd.addColorStop(0.6, "#e6e0cc"); grd.addColorStop(1, "#c9c2aa");
+  g.fillStyle = grd; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(${70 + rnd() * 40}, ${50 + rnd() * 30}, 30, ${0.25 + rnd() * 0.5})`; g.beginPath(); g.arc(rnd() * 512, rnd() * 512, rnd() * 1.8 + 0.4, 0, 7); g.fill(); }
+  g.strokeStyle = "rgba(120, 110, 90, .28)"; g.lineWidth = 0.8;
+  for (let i = 0; i < 40; i++) { let x = rnd() * 512, y = rnd() * 512; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 8; k++) { x += (rnd() - 0.5) * 40; y += (rnd() - 0.5) * 40; g.lineTo(x, y); } g.stroke(); }
+  const moss = g.createLinearGradient(0, 512, 0, 340);
+  moss.addColorStop(0, "rgba(70, 95, 40, .75)"); moss.addColorStop(1, "rgba(70, 95, 40, 0)");
+  g.fillStyle = moss; g.fillRect(0, 340, 512, 172);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return t;
+}
+function petalGeometry(len, wid, cup) {
+  const g = new THREE.PlaneGeometry(1, 1, 30, 44), p = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) {
+    const u = p.getX(i) * 2, v = p.getY(i) + 0.5; // u: -1..1 across, v: 0 base .. 1 tip
+    const w = wid * Math.pow(Math.sin(Math.PI * (0.06 + v * 0.94)), 0.62) * (1 - 0.15 * v);
+    const x = u * w, y = v * len;
+    let z = cup * u * u * (0.25 + 0.75 * Math.sin(Math.PI * Math.min(1, v * 1.1))) - 0.32 * len * v * v;
+    z += 0.025 * noise3(x * 6, y * 6, 3) * Math.abs(u);
+    p.setXYZ(i, x, y, z);
+    uv.setXY(i, (u + 1) / 2, 1 - v);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+const petalMat = new THREE.MeshPhysicalMaterial({ map: petalTexture(), roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.25, side: THREE.DoubleSide, sheen: 0.2 });
+const PETALS = 5, petalAngles = [];
+for (let i = 0; i < PETALS; i++) {
+  const a = (i / PETALS) * Math.PI * 2 + 0.35 + between(-0.12, 0.12);
+  petalAngles.push(a);
+  const hold = new THREE.Group();
+  hold.rotation.z = a - Math.PI / 2;
+  const m = new THREE.Mesh(petalGeometry(between(0.6, 0.7), between(0.26, 0.31), between(0.24, 0.3)), petalMat);
+  m.rotation.x = between(0.0, 0.22);  // open towards the viewer
+  m.rotation.y = between(-0.15, 0.15);
+  m.position.set(0, 0.36, 0.22);
+  hold.add(m);
+  specimen.add(hold);
+}
+
+// Moss: a lumpy cushion of thousands of soft points, over a body of small clumps.
+const mossShape = (dir) => 0.82 * (1 + 0.32 * fbm(dir.x * 2.2 + 5, dir.y * 2.2, dir.z * 2.2) + 0.18 * Math.sin(Math.atan2(dir.y, dir.x) * PETALS + 0.35 * PETALS - 1.4));
+{
+  const N = phone ? 26000 : 50000, pos = [], col = [], size = [];
+  const c = new THREE.Color();
+  const v = new THREE.Vector3();
+  for (let i = 0; i < N; i++) {
+    v.randomDirection(); v.z = Math.abs(v.z) * 0.9 - 0.15; v.normalize();
+    const r = mossShape(v) * (0.55 + 0.45 * Math.pow(rnd(), 0.35));
+    const x = v.x * r, y = v.y * r, rad = Math.hypot(x, y);
+    pos.push(x, y, 0.42 * Math.pow(Math.max(0, 1 - rad / 1.05), 1.1) + v.z * 0.12 + 0.0);
+    const tip = rnd();
+    c.setHSL(between(0.17, 0.3), between(0.3, 0.65), tip > 0.92 ? between(0.4, 0.55) : between(0.08, 0.28));
+    col.push(c.r, c.g, c.b);
+    size.push(between(3.5, 9));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aColor", new THREE.Float32BufferAttribute(col, 3));
+  g.setAttribute("aSize", new THREE.Float32BufferAttribute(size, 1));
+  specimen.add(new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: { uPR: { value: 1 } },
+    vertexShader: `attribute vec3 aColor; attribute float aSize; uniform float uPR; varying vec3 vC; varying float vL;
+      void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = aSize * uPR * (1.0 / -mv.z);
+        vec3 n = normalize(mat3(modelMatrix) * position); vL = 0.55 + 0.9 * max(dot(n, normalize(vec3(-0.5, 0.6, 0.7))), 0.0) + 0.25 * max(dot(n, normalize(vec3(0.6, 0.3, -0.6))), 0.0); vC = aColor; }`,
+    fragmentShader: `varying vec3 vC; varying float vL; void main(){ vec2 q = gl_PointCoord * 2.0 - 1.0; float d = dot(q, q); if (d > 1.0) discard;
+      gl_FragColor = vec4(vC * vL * (1.0 - 0.45 * d), 1.0); }`,
+  })));
+  // Body clumps under the fuzz.
+  const clumpGeo = new THREE.IcosahedronGeometry(1, 2);
+  const clumps = new THREE.InstancedMesh(clumpGeo, new THREE.MeshStandardMaterial({ roughness: 0.95 }), phone ? 500 : 1000);
+  const m4 = new THREE.Matrix4(), qn = new THREE.Quaternion(), s = new THREE.Vector3();
+  for (let i = 0; i < clumps.count; i++) {
+    v.randomDirection(); v.z = Math.abs(v.z) * 0.8 - 0.1; v.normalize();
+    const r = mossShape(v) * between(0.5, 0.9);
+    const sc = between(0.02, 0.05);
+    m4.compose(new THREE.Vector3(v.x * r, v.y * r, v.z * r * 0.5), qn.random(), s.set(sc, sc, sc));
+    clumps.setMatrixAt(i, m4);
+    clumps.setColorAt(i, c.setHSL(between(0.18, 0.3), between(0.3, 0.55), between(0.06, 0.16)));
+  }
+}
+
+// A dark, damp body under the fuzz, so no gaps show through.
+{
+  const g = new THREE.SphereGeometry(1, 48, 32), p = g.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const k = mossShape(v.clone().normalize()) * 0.9; p.setXYZ(i, v.x * k, v.y * k, v.z * k * 0.16 - 0.04); }
+  g.computeVertexNormals();
+  specimen.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x2c3d1c, roughness: 1 })));
+}
+
+// Ferns: a procedural frond, instanced around the rim of the cushion.
+function frondGeometry() {
+  const pos = [], nrm = [];
+  const L = 14;
+  const at = (t) => new THREE.Vector3(0, t, -0.28 * t * t);
+  const tri = (a, b, c) => { pos.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z); for (let k = 0; k < 3; k++) nrm.push(0, 0.2, 1); };
+  for (let k = 0; k < L; k++) {
+    const t = 0.08 + (k / L) * 0.9, p = at(t), len = 0.2 * Math.pow(1 - t, 0.7) * Math.sin(Math.PI * (t * 0.85 + 0.12)) + 0.02;
+    for (const side of [-1, 1]) {
+      const tip = p.clone().add(new THREE.Vector3(side * len * 0.85, len * 0.55, -len * 0.15));
+      const wv = 0.022 * (1 - t * 0.6);
+      tri(p.clone().add(new THREE.Vector3(0, -wv, 0)), tip, p.clone().add(new THREE.Vector3(0, wv, 0)));
+    }
+    // the stem
+    const p2 = at(t + 0.9 / L);
+    tri(p.clone().add(new THREE.Vector3(-0.006, 0, 0)), p2, p.clone().add(new THREE.Vector3(0.006, 0, 0)));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("normal", new THREE.Float32BufferAttribute(nrm, 3));
+  return g;
+}
+{
+  const n = phone ? 18 : 28;
+  const ferns = new THREE.InstancedMesh(frondGeometry(), new THREE.MeshStandardMaterial({ roughness: 0.6, side: THREE.DoubleSide }), n);
+  const o = new THREE.Object3D(), c = new THREE.Color(), v = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + between(-0.08, 0.08);
+    v.set(Math.cos(a), Math.sin(a), 0.1);
+    const r = mossShape(v.clone().normalize()) * between(0.75, 0.98);
+    o.position.set(Math.cos(a) * r, Math.sin(a) * r, between(-0.3, 0.05));
+    o.rotation.set(between(-0.6, 0.2), between(-0.4, 0.4), a - Math.PI / 2 + between(-0.3, 0.3));
+    o.scale.set(between(0.4, 0.7), between(0.45, 0.8), 1);
+    o.updateMatrix();
+    ferns.setMatrixAt(i, o.matrix);
+    ferns.setColorAt(i, c.setHSL(between(0.2, 0.28), between(0.3, 0.5), between(0.18, 0.32)));
+  }
+  specimen.add(ferns);
+}
+
+// Small white flowers with a yellow eye, and dots of lilac.
+function flowerGeometry() {
+  const shape = new THREE.Shape();
+  for (let k = 0; k <= 60; k++) {
+    const a = (k / 60) * Math.PI * 2, r = 0.5 + 0.5 * Math.pow(Math.abs(Math.cos(a * 2.5)), 0.6);
+    const x = Math.cos(a) * r, y = Math.sin(a) * r;
+    k ? shape.lineTo(x, y) : shape.moveTo(x, y);
+  }
+  const g = new THREE.ShapeGeometry(shape, 24);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, -0.18 * (x * x + y * y)); }
+  g.computeVertexNormals();
+  return g;
+}
+{
+  const n = phone ? 10 : 16;
+  const flowers = new THREE.InstancedMesh(flowerGeometry(), new THREE.MeshStandardMaterial({ color: 0xf6f3ea, roughness: 0.5, emissive: 0x2a2a24, side: THREE.DoubleSide }), n);
+  const eyes = new THREE.InstancedMesh(new THREE.SphereGeometry(0.28, 12, 8), new THREE.MeshStandardMaterial({ color: 0xe8c23a, roughness: 0.6, emissive: 0x3a2a00 }), n);
+  const o = new THREE.Object3D(), v = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    v.set(between(-1, 1), between(-1, 1), between(0.35, 1)).normalize();
+    const r = mossShape(v) * between(0.85, 1.02);
+    o.position.set(v.x * r, v.y * r, v.z * r * 0.75 + 0.03);
+    o.lookAt(o.position.clone().multiplyScalar(2).add(new THREE.Vector3(0, 0, 1.5)));
+    o.scale.setScalar(between(0.04, 0.06));
+    o.updateMatrix();
+    flowers.setMatrixAt(i, o.matrix);
+    o.scale.multiplyScalar(0.9); o.updateMatrix();
+    eyes.setMatrixAt(i, o.matrix);
+  }
+  specimen.add(flowers, eyes);
+  const N = phone ? 300 : 600, pos = [], col = [], size = [], c = new THREE.Color();
+  for (let i = 0; i < N; i++) {
+    v.set(between(-1, 1), between(-1, 1), between(-0.2, 1)).normalize();
+    const r = mossShape(v) * between(0.95, 1.2);
+    pos.push(v.x * r, v.y * r, v.z * r * 0.75);
+    c.setHSL(between(0.8, 0.95), between(0.3, 0.5), between(0.55, 0.75)); col.push(c.r, c.g, c.b);
+    size.push(between(3, 6));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aColor", new THREE.Float32BufferAttribute(col, 3));
+  g.setAttribute("aSize", new THREE.Float32BufferAttribute(size, 1));
+  specimen.add(new THREE.Points(g, specimen.children.find((o) => o.isPoints).material));
+}
+
+// Dry twigs and stray stems.
+{
+  const pos = [];
+  const v = new THREE.Vector3();
+  for (let i = 0; i < 70; i++) {
+    const a = rnd() * Math.PI * 2; v.set(Math.cos(a), Math.sin(a), between(-0.1, 0.4)).normalize();
+    const r0 = mossShape(v) * 0.85, len = between(0.15, 0.45);
+    let x = v.x * r0, y = v.y * r0, z = v.z * r0 * 0.7;
+    for (let k = 0; k < 4; k++) { const nx = x + v.x * len / 4 + between(-0.03, 0.03), ny = y + v.y * len / 4 + between(-0.03, 0.03), nz = z + between(-0.02, 0.04); pos.push(x, y, z, nx, ny, nz); x = nx; y = ny; z = nz; }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  specimen.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x6f6a4a, transparent: true, opacity: 0.8 })));
+}
+
+/* ---------- Asteroids ---------- */
+const rockGeo = new THREE.IcosahedronGeometry(1, 3);
+{
+  const p = rockGeo.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const k = 1 + 0.32 * fbm(v.x * 1.6, v.y * 1.6, v.z * 1.6) + 0.08 * noise3(v.x * 6, v.y * 6, v.z * 6); v.multiplyScalar(k); p.setXYZ(i, v.x, v.y, v.z); }
+  rockGeo.computeVertexNormals();
+}
+const ROCKS = phone ? 46 : 70;
+const rocks = new THREE.InstancedMesh(rockGeo, new THREE.MeshStandardMaterial({ color: 0x4a4540, roughness: 0.95, flatShading: true }), ROCKS);
+const rockData = [];
+for (let i = 0; i < ROCKS; i++) {
+  const near = i < 10;
+  const a = rnd() * Math.PI * 2, r = near ? between(2.2, 3.4) : between(1.5, 5.5);
+  rockData.push({
+    p: new THREE.Vector3(Math.cos(a) * r * 1.5, Math.sin(a) * r * 0.9, near ? between(0.8, 2.0) : between(-5, 0.6)),
+    s: near ? between(0.18, 0.4) : between(0.03, 0.16),
+    r: new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6), w: new THREE.Vector3(between(-0.3, 0.3), between(-0.3, 0.3), between(-0.3, 0.3)),
+  });
+}
+scene.add(rocks);
+
+/* ---------- Post: bloom, then the visor lens ---------- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.6, 0.82);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+const lens = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uK: { value: 0.3 }, uTime: { value: 0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 uRes; uniform float uK, uTime; varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    vec2 bend(vec2 c, float k){ vec2 asp = vec2(uRes.x / uRes.y, 1.0); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp); return c * (1.0 + k * r2 + k * 0.7 * r2 * r2); }
+    float glint(vec2 p, vec2 at, vec2 s){ vec2 d = (p - at) / s; return exp(-dot(d, d)); }
+    void main(){
+      vec2 c = vUv * 2.0 - 1.0;
+      vec2 src = bend(c, uK);
+      vec2 uv = src * 0.5 + 0.5;
+      vec2 e = min(uv, 1.0 - uv); float inside = min(e.x, e.y);
+      vec3 col;
+      if (inside < 0.0) {
+        // The rim of the visor: dark, faintly lit, with warm glints of cabin light.
+        float d = -inside;
+        col = vec3(0.012, 0.016, 0.018) + vec3(0.03, 0.035, 0.03) * exp(-d * 30.0);
+        col += vec3(0.75, 0.8, 0.7) * exp(-d * 260.0) * 0.55;
+        // Glints sit on the curved edge itself: strongest just outside the glass.
+        float band = exp(-d * 55.0);
+        float gl = glint(vUv, vec2(0.07, 0.86), vec2(0.022, 0.05)) + glint(vUv, vec2(0.16, 0.93), vec2(0.05, 0.012))
+                 + glint(vUv, vec2(0.93, 0.86), vec2(0.022, 0.05)) + glint(vUv, vec2(0.84, 0.93), vec2(0.05, 0.012))
+                 + glint(vUv, vec2(0.07, 0.14), vec2(0.02, 0.04)) * 0.6 + glint(vUv, vec2(0.93, 0.14), vec2(0.02, 0.04)) * 0.6;
+        col += vec3(1.0, 0.9, 0.75) * gl * band * 1.3;
+        col += (hash(vUv * uRes) - 0.5) * 0.02;
+      } else {
+        vec2 asp = vec2(uRes.x / uRes.y, 1.0); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp);
+        float ca = 0.006 * r2 * r2 + 0.0015;
+        col = vec3(texture2D(tDiffuse, (src * (1.0 + ca)) * 0.5 + 0.5).r, texture2D(tDiffuse, uv).g, texture2D(tDiffuse, (src * (1.0 - ca)) * 0.5 + 0.5).b);
+        // Glass: darker towards the rim, a soft curved reflection, the faint rim edge.
+        col *= 0.55 + 0.45 * smoothstep(0.0, 0.16, inside);
+        col += vec3(0.85, 0.9, 1.0) * glint(vUv, vec2(0.2, 0.86), vec2(0.18, 0.05)) * 0.06;
+        col += vec3(0.7, 0.8, 0.75) * exp(-inside * 140.0) * 0.18;
+        col *= 0.95 + 0.05 * sin(gl_FragCoord.y * 1.4);
+        col += (hash(vUv * uRes + fract(uTime) * 91.0) - 0.5) * 0.03;
+      }
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+});
+composer.addPass(lens);
+
+// Where a scene point ends up on screen, after the lens (inverse of bend()).
+const tv = new THREE.Vector3();
+function onScreen(v) {
+  tv.copy(v).project(camera);
+  const asp = innerWidth / innerHeight, k = lens.uniforms.uK.value, norm = asp * asp + 1;
+  let x = tv.x, y = tv.y;
+  for (let i = 0; i < 10; i++) { const r2 = ((x * asp) ** 2 + y * y) / norm, s = 1 + k * r2 + k * 0.7 * r2 * r2; x = tv.x / s; y = tv.y / s; }
+  return { x: (x * 0.5 + 0.5) * innerWidth, y: (-y * 0.5 + 0.5) * innerHeight };
+}
+
+/* ---------- Layout ---------- */
+let shiftY = 0;
+function layout() {
+  phone = innerWidth < 760;
+  const W = innerWidth, H = innerHeight, pr = Math.min(devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(pr); renderer.setSize(W, H, false);
+  composer.setPixelRatio(pr); composer.setSize(W, H);
+  camera.aspect = W / H;
+  camera.fov = phone ? 52 : 34;
+  camera.updateProjectionMatrix();
+  lens.uniforms.uRes.value.set(W * pr, H * pr);
+  lens.uniforms.uK.value = phone ? 0.22 : 0.3;
+  scene.traverse((o) => { if (o.material?.uniforms?.uPR) o.material.uniforms.uPR.value = pr * H / 420; });
+  shiftY = phone ? 0.17 : 0;
+  planet.position.set(phone ? 3.4 : 6.6, phone ? 7.0 : 3.4, -10);
+  planet.scale.setScalar(phone ? 3.2 : 3.6);
+  const set = (id, css) => Object.assign($(id).style, css);
+  if (!phone) {
+    set("#geo", { left: "8.5%", top: "21%" }); set("#cam", { right: "8.5%", top: "21%" });
+    set("#p1", { left: "6.5%", top: "24%" }); set("#p2", { right: "6.5%", top: "24%" }); set("#p3", { left: "8.5%", top: "29%" }); set("#p4", { right: "13%", top: "53%" });
+    set("#brand", { left: "6.8%", top: "43%", textAlign: "left", right: "auto" });
+    set("#bl", { left: "7%", bottom: "11%" }); set("#br", { right: "7%", bottom: "11%" });
+  } else {
+    set("#geo", { left: "10%", top: "10%" }); set("#cam", { right: "10%", top: "10%" });
+    set("#p1", { left: "5%", top: "8%" }); set("#p2", { right: "5%", top: "8%" }); set("#p3", { left: "5%", top: "14%" }); set("#p4", { right: "5%", top: "14%" });
+    set("#brand", { left: "0", right: "0", top: "60%", textAlign: "center" });
+    set("#bl", { display: "none" }); set("#br", { display: "none" });
+  }
+  const wave = $("#wave"), ww = phone ? W * 0.62 : W * 0.38, wh = 44;
+  wave.width = ww * pr; wave.height = wh * pr;
+  Object.assign(wave.style, { width: `${ww}px`, height: `${wh}px`, left: `${(W - ww) / 2 - (phone ? 18 : 30)}px`, bottom: phone ? "14.5%" : "10.5%" });
+  set("#bpm", { left: `${(W + ww) / 2 - (phone ? 10 : 22)}px`, bottom: phone ? `calc(14.5% + 15px)` : `calc(10.5% + 15px)` });
+  if (phone) Object.assign($(".mail").style, { position: "fixed", left: "0", right: "0", bottom: "8%", justifyContent: "center", display: "flex" });
+  const meter = $("#meter"); meter.innerHTML = Array.from({ length: 14 }, (_, i) => `<i class="${i > 10 ? "off" : ""}"></i>`).join("") + "<b></b>";
+  if (phone) meter.style.justifyContent = "center";
+}
+addEventListener("resize", layout);
+layout();
+
+/* ---------- HUD lines: callouts and the scan ring, pinned to the specimen ---------- */
+const SVGNS = "http://www.w3.org/2000/svg";
+const lines = $("#lines");
+const anchors = [new THREE.Vector3(0.55, 0.55, 0.3), new THREE.Vector3(0.55, -0.6, 0.2)];
+function drawLines() {
+  const C = onScreen(specimen.position);
+  const edge = onScreen(new THREE.Vector3(specimen.position.x + 1.25, specimen.position.y, 0));
+  const R = Math.abs(edge.x - C.x);
+  let html = "";
+  html += `<circle cx="${C.x}" cy="${C.y}" r="${R}" fill="none" stroke="rgba(168,240,160,.32)" stroke-dasharray="2 5"/>`;
+  html += `<path d="M${C.x - 6},${C.y - R - 14} L${C.x + 6},${C.y - R - 14} L${C.x},${C.y - R - 4} Z" fill="none" stroke="rgba(168,240,160,.7)"/>`;
+  if (!phone) html += `<path d="M${C.x},${C.y + R + 4} L${C.x - 4},${C.y + R + 12} L${C.x + 4},${C.y + R + 12} Z" fill="rgba(168,240,160,.7)"/>`;
+  if (!phone) {
+    // a scale on the right of the ring
+    const sx = C.x + R + 60;
+    for (let i = 0; i <= 12; i++) { const y = C.y - R * 0.55 + (i / 12) * R * 1.1; html += `<line x1="${sx}" y1="${y}" x2="${sx + (i % 4 ? 5 : 11)}" y2="${y}" stroke="rgba(168,240,160,${i % 4 ? .35 : .7})"/>`; }
+    html += `<line x1="${sx}" y1="${C.y - R * 0.55}" x2="${sx}" y2="${C.y + R * 0.55}" stroke="rgba(168,240,160,.35)"/>`;
+    const boxes = [$("#c1"), $("#c2")];
+    anchors.forEach((a, i) => {
+      const w = specimen.localToWorld(a.clone()), P = onScreen(w);
+      const el = boxes[i], lx = C.x + R * (i ? 1.12 : 0.92), ly = i ? C.y + R * 0.72 : C.y - R * 0.62;
+      el.style.left = `${lx + 12}px`; el.style.top = `${ly - 10}px`;
+      html += `<polyline points="${P.x},${P.y} ${lx - 26},${ly} ${lx + 6},${ly}" fill="none" stroke="rgba(168,240,160,.6)"/><circle cx="${P.x}" cy="${P.y}" r="2" fill="rgba(168,240,160,.9)"/>`;
+    });
+  }
+  lines.innerHTML = html;
+}
+
+/* ---------- Waveform ---------- */
+const wave = $("#wave"), wg = wave.getContext("2d");
+function drawWave(t) {
+  const w = wave.width, h = wave.height, mid = h / 2, pr = w / parseFloat(wave.style.width);
+  wg.clearRect(0, 0, w, h);
+  const beat = Math.pow(1 - (((t * 124) / 60) % 1), 3);
+  wg.strokeStyle = "rgba(168,240,160,.9)"; wg.lineWidth = 1 * pr; wg.shadowColor = "rgba(140,255,140,.8)"; wg.shadowBlur = 6 * pr;
+  wg.beginPath();
+  for (let x = 0; x < w; x += 2 * pr) {
+    const u = x / w, env = Math.pow(Math.sin(u * Math.PI), 0.8);
+    const spike = Math.abs(Math.sin(u * 211 + t * 9) * Math.sin(u * 37 - t * 4) * Math.sin(u * 13 + t));
+    const a = env * spike * (0.25 + beat * 0.75) * mid * 0.95 + 0.6 * pr;
+    wg.moveTo(x, mid - a); wg.lineTo(x, mid + a);
+  }
+  wg.stroke();
+  wg.shadowBlur = 0; wg.strokeStyle = "rgba(168,240,160,.35)"; wg.setLineDash([2 * pr, 3 * pr]);
+  wg.beginPath(); wg.moveTo(0, mid); wg.lineTo(w, mid); wg.stroke(); wg.setLineDash([]);
+}
+
+/* ---------- Pointer parallax ---------- */
+const look = { x: 0, y: 0, tx: 0, ty: 0 };
+addEventListener("pointermove", (e) => { look.tx = (e.clientX / innerWidth) * 2 - 1; look.ty = (e.clientY / innerHeight) * 2 - 1; });
+addEventListener("deviceorientation", (e) => { if (e.gamma != null) { look.tx = Math.max(-1, Math.min(1, e.gamma / 30)); look.ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); } });
+
+/* ---------- Loop ---------- */
+const m4 = new THREE.Matrix4(), qn = new THREE.Quaternion(), sc = new THREE.Vector3();
+const t0 = performance.now();
+function frame(now) {
+  const t = frozen ?? (still ? 12 : (now - t0) / 1000);
+  look.x += (look.tx - look.x) * 0.04; look.y += (look.ty - look.y) * 0.04;
+  // The specimen drifts and turns slowly.
+  specimen.position.set(phone ? 0 : 0.05, phone ? 0.0 : 0.02 + Math.sin(t * 0.4) * 0.03, 0);
+  specimen.rotation.set(0.12 + Math.sin(t * 0.21) * 0.08 + look.y * 0.1, Math.sin(t * 0.17) * 0.28 + look.x * 0.18, t * 0.035);
+  for (let i = 0; i < ROCKS; i++) {
+    const d = rockData[i];
+    const p = d.p.clone(); p.x += Math.sin(t * 0.05 + i) * 0.1; p.y += Math.cos(t * 0.04 + i * 2) * 0.08;
+    qn.setFromEuler(new THREE.Euler(d.r.x + t * d.w.x, d.r.y + t * d.w.y, d.r.z + t * d.w.z));
+    rocks.setMatrixAt(i, m4.compose(p, qn, sc.setScalar(d.s)));
+  }
+  rocks.instanceMatrix.needsUpdate = true;
+  planet.rotation.y = t * 0.01;
+  sky.material.uniforms.uTime.value = t;
+  lens.uniforms.uTime.value = t;
+  const dist = phone ? 6.4 : 5.6;
+  camera.position.set(look.x * 0.25, -look.y * 0.18, dist);
+  camera.lookAt(0, 0, 0);
+  camera.setViewOffset(innerWidth, innerHeight, 0, shiftY * innerHeight, innerWidth, innerHeight);
+  camera.updateMatrixWorld();
+  sky.position.copy(camera.position);
+  composer.render();
+  drawLines();
+  drawWave(t);
+  $("#lat").textContent = `${(23.9 + Math.sin(t * 0.07) * 0.2).toFixed(1)}°`;
+  $("#lon").textContent = `${(146.7 + t * 0.002).toFixed(1)}°`;
+  document.body.dataset.ready = "1";
+  if (!still || frozen != null) requestAnimationFrame(frame);
+}
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { $("#hud").classList.add("on"); requestAnimationFrame(frame); });
+</script>
+</body>
+</html>

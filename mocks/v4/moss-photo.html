@@ -10,46 +10,51 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  :root { --g: #a8f0a0; --g2: rgba(168, 240, 160, .62); --mono: "Share Tech Mono", ui-monospace, monospace; }
+  :root { --g: #b2f5a8; --g2: rgba(178, 245, 168, .66); --mono: "Share Tech Mono", ui-monospace, monospace; --u: 1vh; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; }
   body { color: var(--g); font: 13px/1.35 var(--mono); -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
   #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-  .hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 0 8px rgba(140, 255, 140, .45); opacity: 0; transition: opacity 1.6s .3s; }
+  .hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 0 6px rgba(150, 255, 150, .5); opacity: 0; transition: opacity 1.6s .3s; }
   .hud.on { opacity: 1; }
   .hud a { pointer-events: auto; }
-  .blk { position: absolute; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+  .blk { position: absolute; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
   .blk.r { text-align: right; }
-  .data { font-size: 12.5px; line-height: 1.45; }
-  .data span { display: inline-block; min-width: 3.4em; color: var(--g2); }
-  .plus { position: absolute; width: 14px; height: 14px; }
+  .data { font-size: calc(var(--u) * 1.62); line-height: 1.42; }
+  .data span { display: inline-block; min-width: 3.6em; }
+  .plus { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; }
   .plus::before, .plus::after { content: ""; position: absolute; background: var(--g2); }
-  .plus::before { left: 6.5px; top: 0; width: 1px; height: 14px; } .plus::after { top: 6.5px; left: 0; height: 1px; width: 14px; }
-  .wordmark { font-size: clamp(44px, 4.6vw, 70px); letter-spacing: .62em; line-height: 1; text-shadow: 0 0 14px rgba(140, 255, 140, .6), 0 0 40px rgba(120, 255, 140, .25); }
-  .role { margin-top: 18px; font-size: clamp(13px, 1.25vw, 18px); letter-spacing: .62em; }
-  .tx { margin-top: 40px; font-size: clamp(13px, 1.15vw, 16px); letter-spacing: .26em; }
-  .meter { display: flex; gap: 2px; margin-top: 10px; align-items: center; }
-  .meter i { width: 4px; height: 7px; background: var(--g); }
-  .meter i.off { opacity: .18; }
-  .meter b { width: 1px; height: 9px; background: var(--g2); margin-left: 70px; }
-  .mail { display: inline-flex; gap: 10px; align-items: center; margin-top: 34px; font-size: 13px; letter-spacing: .14em; }
+  .plus::before { left: 7.5px; top: 0; width: 1px; height: 16px; } .plus::after { top: 7.5px; left: 0; height: 1px; width: 16px; }
+  .wordmark { font-size: calc(var(--u) * 7.4); letter-spacing: .78em; line-height: 1; text-shadow: 0 0 12px rgba(150, 255, 150, .55), 0 0 36px rgba(120, 255, 140, .22); }
+  .role { margin-top: calc(var(--u) * 2.4); font-size: calc(var(--u) * 2.05); letter-spacing: .68em; }
+  .tx { margin-top: calc(var(--u) * 5.2); font-size: calc(var(--u) * 2.0); letter-spacing: .24em; }
+  .meter { display: flex; gap: 2px; margin-top: calc(var(--u) * 1.4); align-items: center; }
+  .meter i { width: 3px; height: 7px; background: var(--g); }
+  .meter i.off { opacity: .22; }
+  .meter s { width: 120px; height: 1px; background: rgba(178, 245, 168, .4); margin-left: 6px; }
+  .meter b { width: 1px; height: 9px; background: var(--g2); }
+  .mail { display: inline-flex; gap: 12px; align-items: center; margin-top: calc(var(--u) * 4.6); font-size: calc(var(--u) * 1.62); letter-spacing: .14em; }
   .mail:hover { color: #fff; }
-  .mail::before { content: ""; border-left: 8px solid var(--g2); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
-  .callout { font-size: 12px; line-height: 1.5; letter-spacing: .14em; }
-  .bracket { padding: 2px 10px; border-left: 1px solid var(--g2); font-size: 11px; line-height: 1.4; color: var(--g2); }
-  .blk.r .bracket { border-left: 0; border-right: 1px solid var(--g2); }
+  .mail::before { content: ""; width: 0; height: 0; border-left: 8px solid var(--g2); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .callout { font-size: calc(var(--u) * 1.55); line-height: 1.55; letter-spacing: .14em; }
+  .bracket { position: relative; padding: 1px 0 1px 12px; font-size: calc(var(--u) * 1.4); line-height: 1.42; }
+  .bracket::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; border: 1px solid var(--g2); border-right: 0; }
+  .blk.r .bracket { padding: 1px 12px 1px 0; }
+  .blk.r .bracket::before { left: auto; right: 0; border: 1px solid var(--g2); border-left: 0; }
   #lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   #wave { position: absolute; display: block; }
-  .bpm { font-size: 12px; letter-spacing: .14em; }
+  .bpm { font-size: calc(var(--u) * 1.5); letter-spacing: .14em; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   @media (max-width: 760px) {
-    .wordmark { font-size: 40px; letter-spacing: .5em; text-indent: .5em; }
-    .role { font-size: 12px; letter-spacing: .5em; margin-top: 12px; }
-    .tx { margin-top: 22px; font-size: 12px; }
-    .data { font-size: 10.5px; }
+    .wordmark { font-size: calc(var(--u) * 5.3); letter-spacing: .6em; text-indent: .6em; }
+    .role { font-size: calc(var(--u) * 1.6); letter-spacing: .6em; text-indent: .6em; margin-top: calc(var(--u) * 1.6); }
+    .tx { margin-top: calc(var(--u) * 3); font-size: calc(var(--u) * 1.5); }
+    .meter { justify-content: center; }
+    .meter s { width: 60px; }
+    .data { font-size: calc(var(--u) * 1.32); }
     .callout, #bl, #br { display: none; }
-    .mail { margin-top: 0; font-size: 11px; }
+    .mail { margin-top: 0; font-size: calc(var(--u) * 1.3); }
     .mail::before { display: none; }
   }
 </style>
@@ -62,7 +67,7 @@
   <svg id="lines" aria-hidden="true"></svg>
   <div class="blk data" id="geo" aria-hidden="true"><div><span>LAT</span><b id="lat">23.9°</b></div><div><span>LON</span><b id="lon">146.7°</b></div><div><span>DIST</span><b>1.8 AU</b></div></div>
   <div class="blk data r" id="cam" aria-hidden="true"><div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div></div>
-  <div class="plus" id="p1"></div><div class="plus" id="p2"></div><div class="plus" id="p3"></div><div class="plus" id="p4"></div>
+  <div class="plus" id="p1"></div><div class="plus" id="p2"></div><div class="plus" id="p3"></div><div class="plus" id="p4"></div><div class="plus" id="p5"></div>
   <div class="blk" id="brand">
     <div class="wordmark" aria-hidden="true">MOSS</div>
     <div class="role">DJ · PRODUCER</div>
@@ -75,14 +80,14 @@
   <div class="blk" id="bl" aria-hidden="true"><div class="bracket">AUDIO<br>LIVE FEED<br>STABLE</div></div>
   <div class="blk r" id="br" aria-hidden="true"><div class="bracket">SPECIMEN<br>BIOSCAN<br>V.1.0</div></div>
   <canvas id="wave" aria-hidden="true"></canvas>
-  <div class="blk bpm" id="bpm" aria-hidden="true">124 BPM</div>
+  <div class="blk bpm" id="bpm" aria-hidden="true">| &nbsp;124 BPM</div>
 </div>
 
 <script>
 (function () {
-  // The images. Any that is missing falls back to a generated version.
+  // Images. Any that is missing falls back to a generated version.
   // `opaque`: the specimen sits on a background (not a transparent PNG), so
-  // its edges are faded out with a soft round mask.
+  // its edges are faded out with a soft, uneven mask.
   const ASSETS = {
     specimen: { src: "assets/moss-specimen.png", fallback: "assets/placeholder-specimen.png", opaque: false },
     space: { src: "assets/moss-space.jpg" },
@@ -92,188 +97,280 @@
   const q = new URLSearchParams(location.search);
   const frozen = q.has("t") ? +q.get("t") : null;
   const $ = (s) => document.querySelector(s);
-  let phone = innerWidth < 760, W, H, PR;
+  let phone, W, H, PR, K;
 
-  /* ---------- WebGL: one pass composes every layer through the visor ---------- */
+  /* ---------- GL plumbing ---------- */
   const canvas = $("#view");
   const gl = canvas.getContext("webgl", { antialias: false, premultipliedAlpha: false });
   const VS = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }";
-  const FS = `precision highp float;
-    uniform sampler2D uSpec, uSpace, uPlanet;
-    uniform float uHasSpace, uHasPlanet, uSpecOpaque, uTime, uK;
-    uniform vec2 uRes, uPar;
-    uniform vec4 uSpecBox;    // centre x, y (px), size (px), rotation
-    uniform vec4 uPlanetBox;  // centre x, y (px), radius (px), -
-    varying vec2 vUv;
+  const COMMON = `precision highp float; varying vec2 vUv;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
       return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
-    float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 6; i++){ s += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= .5; } return s; }
-    float ridge(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a * pow(1. - abs(noise(p) * 2. - 1.), 5.); p = p * 2.1 + 3.3; a *= .5; } return s; }
-    float stars(vec2 p, float s, float t){ vec2 g = p * s, id = floor(g), f = fract(g) - .5; float h = hash(id);
-      vec2 o = vec2(hash(id + 3.1), hash(id + 7.7)) - .5; return step(.93, h) * smoothstep(.08, 0., length(f - o * .7)) * (.6 + .4 * sin(t * 2. + h * 70.)) * (h - .9) * 12.; }
-    vec2 bend(vec2 c, float k){ vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp); return c * (1. + k * r2 + k * .7 * r2 * r2); }
-    float glint(vec2 p, vec2 at, vec2 s){ vec2 d = (p - at) / s; return exp(-dot(d, d)); }
+    float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 6; i++){ s += a * noise(p); p = mat2(1.6, 1.2, -1.2, 1.6) * p + vec2(1.7, 9.2); a *= .5; } return s; }
+    float ridge(vec2 p){ float s = 0., a = .55; for (int i = 0; i < 6; i++){ s += a * pow(1. - abs(noise(p) * 2. - 1.), 8.); p = mat2(1.6, 1.2, -1.2, 1.6) * p + 3.3; a *= .55; } return s; }
+`;
+  function program(fs) {
+    const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    const p = gl.createProgram();
+    gl.attachShader(p, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, COMMON + fs)); gl.linkProgram(p);
+    const cache = {};
+    return { p, u: (n) => (n in cache ? cache[n] : (cache[n] = gl.getUniformLocation(p, n))) };
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  function draw(prog) {
+    const loc = gl.getAttribLocation(prog.p, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  function tex(w, h, data) {
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    if (data && data.nodeName) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data || null);
+    [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+    return t;
+  }
+  function target(w, h) { const t = tex(w, h); const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return { t, f }; }
+  const bind = (unit, t) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); };
 
-    vec3 space(vec2 px){
-      vec2 uv = px / uRes;
-      if (uHasSpace > .5) {
-        vec2 s = (uv - .5) * .94 + .5 + uPar * .012;          // a little overscan for the parallax
-        return texture2D(uSpace, s).rgb;
+  /* ---------- Pass 1: deep space (rendered once per size, slightly oversized for parallax) ---------- */
+  const SPACE = program(`
+    uniform vec2 uRes; uniform float uPhone;
+    float star(vec2 p, float s, float th){ vec2 g = p * s, id = floor(g), f = fract(g) - .5; float h = hash(id);
+      vec2 o = vec2(hash(id + 3.1), hash(id + 7.7)) - .5; float d = length(f - o * .7);
+      return step(th, h) * (smoothstep(.09, 0., d) + smoothstep(.35, 0., d) * .12) * (.4 + .6 * hash(id + 1.7)); }
+    void main(){
+      vec2 px = vec2(vUv.x, 1. - vUv.y) * uRes;
+      vec2 a = (px - uRes * .5) / uRes.y;
+      vec2 w = vec2(fbm(a * 2.1 + 3.), fbm(a * 2.1 + 8.));
+      vec2 b = a * 2.4 + w * 1.4;
+      float n = fbm(b), m = fbm(b * 1.7 + 5.), d = length(a * vec2(uPhone > .5 ? 1.3 : .8, 1.));
+      float edge = smoothstep(.1, .85, d);
+      vec3 col = vec3(.006, .012, .016);
+      float teal = smoothstep(.42, .82, m) * (.35 + .9 * edge);
+      col += vec3(.05, .26, .24) * teal + vec3(.12, .48, .42) * pow(smoothstep(.6, .9, m), 2.) * edge;
+      float vio = smoothstep(.45, .85, n) * (.3 + edge);
+      col += vec3(.18, .06, .3) * vio;
+      float fil = ridge(b * 1.6 + m * 2.);
+      col += vec3(.78, .45, 1.) * pow(fil, 3.) * smoothstep(.4, .75, n) * (.4 + edge) * .9;
+      col += vec3(.4, .95, .85) * pow(ridge(b * 2.3 - 4.), 4.) * smoothstep(.5, .85, m) * edge * .35;
+      col *= .55 + .45 * smoothstep(.25, .6, fbm(b * 3. + 11.));
+      col *= .35 + .65 * smoothstep(.05, .5, d);
+      col += vec3(.9, .95, 1.) * (star(a, 70., .965) + star(a + 3., 150., .975) * .8 + star(a + 7., 320., .98) * .6);
+      col += vec3(.85, .9, 1.) * star(a + 11., 24., .992) * 1.6;
+      gl_FragColor = vec4(col, 1.);
+    }`);
+
+  /* ---------- Pass 2: the scene (space, planet, asteroids, debris, specimen) ---------- */
+  const ROCKS = 18;
+  const SCENE = program(`
+    uniform sampler2D uSpace, uSpec, uPlanet;
+    uniform float uHasPlanet, uSpecOpaque, uTime, uOver, uSpaceIsImage;
+    uniform vec2 uRes, uPar;
+    uniform vec4 uSpecBox, uPlanetBox;
+    uniform vec4 uRock[${ROCKS}];
+    uniform vec3 uRockZ[${ROCKS}];
+    vec3 rock(vec2 px, vec3 col){
+      for (int i = 0; i < ${ROCKS}; i++){
+        vec4 r = uRock[i]; vec3 z = uRockZ[i];
+        vec2 d = px - r.xy - uPar * uRes.y * (.004 + z.x * .05);
+        float R = r.z * 1.4 + z.z * 2.; if (dot(d, d) > R * R) continue;
+        float c = cos(z.y), s = sin(z.y); d = mat2(c, -s, s, c) * d / r.z;
+        float ang = atan(d.y, d.x), rr = length(d);
+        vec2 dir = vec2(cos(ang), sin(ang));
+        float shape = 1. + .44 * (noise(dir * 1.8 + r.w) - .5) + .16 * (noise(dir * 5. + r.w * 2.) - .5);
+        float soft = max(.03, z.z / r.z);
+        float a = smoothstep(shape + soft, shape - soft, rr);
+        if (a <= 0.) continue;
+        vec2 qq = d / shape; float h = sqrt(max(0., 1. - dot(qq, qq)));
+        vec3 n = normalize(vec3(qq + (vec2(noise(d * 6. + r.w), noise(d * 6. + r.w + 9.)) - .5) * .7, h));
+        float crat = smoothstep(.55, .75, noise(d * 3.5 + r.w * 3.));
+        vec3 base = mix(vec3(.12, .11, .105), vec3(.06, .055, .06), crat) * (.8 + .4 * noise(d * 12. + r.w));
+        float key = max(dot(n, normalize(vec3(-.6, -.55, .6))), 0.);
+        float rim = pow(max(dot(n, normalize(vec3(.8, .1, .25))), 0.), 3.);
+        vec3 lit = base * (.15 + 1.6 * key) + vec3(.25, .55, .5) * rim * .35 + vec3(.4, .25, .6) * pow(1. - h, 3.) * .2;
+        lit *= mix(.5, .9, z.x);
+        col = mix(col, lit, a);
       }
-      vec2 a = (px - uRes * .5) / uRes.y * 2.6 + uPar * .03 + vec2(uTime * .004, 0.);
-      float n = fbm(a * 1.2), m = fbm(a * 2.2 + n * 1.6 + 3.);
-      vec3 col = vec3(.004, .008, .01);
-      col += vec3(.015, .11, .095) * smoothstep(.35, .9, m) * (.5 + n);
-      col += vec3(.12, .035, .19) * smoothstep(.45, .95, n) * smoothstep(.3, .8, m);
-      col += vec3(.55, .32, .9) * pow(ridge(a * 1.4 + m), 2.2) * smoothstep(.4, .85, n) * .6;
-      col *= .55 + .45 * smoothstep(.0, .55, length(px / uRes - .5));    // darker behind the specimen
-      vec2 b = a + uPar * .015;
-      col += vec3(.9, .95, 1.) * (stars(b, 30., uTime) + stars(b, 70., uTime * 1.3) * .6 + stars(b, 150., uTime) * .35);
       return col;
     }
-    vec4 planet(vec2 px){
-      vec2 d = (px - uPlanetBox.xy - uPar * uRes.y * .01) / uPlanetBox.z;
-      if (uHasPlanet > .5) { vec2 u = d * .5 + .5; if (u.x < 0. || u.y < 0. || u.x > 1. || u.y > 1.) return vec4(0.); return texture2D(uPlanet, u); }
-      float r = length(d); if (r > 1.04) return vec4(0.);
-      vec3 n = normalize(vec3(d, sqrt(max(0., 1. - r * r))));
-      float lat = n.y + fbm(n.xy * 4.) * .08;
-      vec3 c = mix(vec3(.05, .12, .13), vec3(.12, .2, .22), sin(lat * 18.) * .5 + .5);
-      float nl = dot(n, normalize(vec3(-.7, .4, .6)));
-      vec3 col = c * (.01 + .5 * smoothstep(-.05, 1., nl));
-      col += vec3(.3, .75, .7) * pow(r, 7.) * smoothstep(-.3, .7, nl) * .55 + vec3(.45, .22, .75) * pow(r, 9.) * .35;
-      return vec4(col, smoothstep(1.04, 1., r));
-    }
-    vec4 specimen(vec2 px){
-      vec2 d = px - uSpecBox.xy - uPar * uRes.y * .022;
-      float c = cos(-uSpecBox.w), s = sin(-uSpecBox.w);
-      d = mat2(c, -s, s, c) * d;
-      vec2 u = d / uSpecBox.z + .5;
-      if (u.x < 0. || u.y < 0. || u.x > 1. || u.y > 1.) return vec4(0.);
-      vec4 t = texture2D(uSpec, u);
-      if (uSpecOpaque > .5) {
-        // A soft, uneven edge so the cut-out melts into space.
-        float r = length(u - .5) + (noise(u * 9.) - .5) * .05;
-        t.a = smoothstep(.5, .36, r);
-        t.rgb *= mix(.55, 1., smoothstep(.5, .3, r));
-      }
-      // A slow scan of light across the specimen.
-      float sweep = exp(-pow((u.y - fract(uTime * .05) * 1.6 + .3) * 9., 2.));
-      t.rgb += vec3(.35, 1., .5) * sweep * .06 * t.a;
-      return t;
-    }
-    vec3 compose(vec2 uv){
-      vec2 px = vec2(uv.x, 1. - uv.y) * uRes;   // top-left origin, like the page
-      vec3 col = space(px);
-      vec4 p = planet(px); col = mix(col, p.rgb, p.a);
-      vec4 s = specimen(px); col = mix(col, s.rgb, s.a);
-      return col;
+    vec3 debris(vec2 px, vec3 col){
+      vec2 p = px - uSpecBox.xy; float dist = length(p) / uSpecBox.z;
+      if (dist < .28 || dist > .78) return col;
+      float band = smoothstep(.28, .4, dist) * smoothstep(.78, .55, dist);
+      vec2 g = (p + vec2(uTime * 3., -uTime * 2.)) / (uRes.y * .016);
+      vec2 id = floor(g), f = fract(g) - .5;
+      float h = hash(id + 17.);
+      if (h < .86) return col;
+      vec2 o = (vec2(hash(id + 1.3), hash(id + 5.1)) - .5) * .6;
+      float s = mix(.06, .2, hash(id + 9.));
+      float a = smoothstep(s, s * .5, length(f - o)) * band;
+      vec3 chip = hash(id + 2.) > .75 ? vec3(.55, .6, .45) : vec3(.05, .05, .04);
+      return mix(col, chip, a);
     }
     void main(){
+      vec2 px = vec2(vUv.x, 1. - vUv.y) * uRes;
+      vec2 su = (px / uRes - .5) / uOver + .5 + uPar * .006;
+      vec3 col = texture2D(uSpace, vec2(su.x, uSpaceIsImage > .5 ? su.y : 1. - su.y)).rgb;
+      vec2 pd = (px - uPlanetBox.xy - uPar * uRes.y * .012) / uPlanetBox.z;
+      float pr = length(pd);
+      if (uHasPlanet > .5) {
+        vec2 u = pd * .5 + .5;
+        if (u.x > 0. && u.y > 0. && u.x < 1. && u.y < 1.) { vec4 t = texture2D(uPlanet, u); col = mix(col, t.rgb, t.a); }
+      } else {
+        col += vec3(.1, .3, .3) * exp(-max(pr - 1., 0.) * 22.) * .55 * smoothstep(1.3, 1., pr);
+        if (pr < 1.) {
+          vec3 n = normalize(vec3(pd, sqrt(1. - pr * pr)));
+          float lat = n.y + (noise(n.xy * 5.) - .5) * .08 + (noise(n.xy * 18.) - .5) * .015;
+          vec3 c = mix(vec3(.05, .1, .11), vec3(.1, .16, .17), sin(lat * 22.) * .5 + .5);
+          c = mix(c, vec3(.16, .1, .2), smoothstep(.4, .8, noise(n.xy * 2.5 + 4.)) * .5);
+          float nl = dot(n, normalize(vec3(-.95, -.15, .25)));
+          vec3 pl = c * (.04 + 1.1 * smoothstep(.0, .9, nl));
+          pl += vec3(.35, .75, .7) * pow(1. - n.z, 5.) * smoothstep(-.2, .5, nl) * .9;
+          pl += vec3(.45, .25, .75) * pow(1. - n.z, 7.) * .25;
+          col = mix(col, pl, smoothstep(1., .995, pr));
+        }
+      }
+      col = rock(px, col);
+      col = debris(px, col);
+      vec2 d = px - uSpecBox.xy - uPar * uRes.y * .022;
+      float c = cos(-uSpecBox.w), s = sin(-uSpecBox.w);
+      vec2 u = mat2(c, -s, s, c) * d / uSpecBox.z + .5;
+      if (u.x > 0. && u.y > 0. && u.x < 1. && u.y < 1.) {
+        vec4 t = texture2D(uSpec, u);
+        if (uSpecOpaque > .5) {
+          float rr = length(u - .5) + (noise(u * 7.) - .5) * .07 + (noise(u * 23.) - .5) * .03;
+          t.a = smoothstep(.49, .38, rr);
+          t.rgb *= mix(.4, 1., smoothstep(.49, .33, rr));
+        }
+        float sweep = exp(-pow((u.y - fract(uTime * .05) * 1.6 + .3) * 9., 2.));
+        t.rgb = t.rgb * 1.08 + vec3(.35, 1., .5) * sweep * .05 * t.a;
+        col = mix(col, t.rgb, t.a);
+      }
+      gl_FragColor = vec4(col, 1.);
+    }`);
+
+  /* ---------- Pass 3: the visor (lens, blur, glow, glass lip, reflections) ---------- */
+  const LENS = program(`
+    uniform sampler2D uScene; uniform vec2 uRes; uniform float uK, uTime;
+    vec2 bend(vec2 c){ vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp); return c * (1. + uK * r2 + uK * .75 * r2 * r2); }
+    vec3 at(vec2 uv){ return texture2D(uScene, uv).rgb; }
+    void main(){
       vec2 c = vUv * 2. - 1.;
-      vec2 src = bend(c, uK);
-      vec2 uv = src * .5 + .5;
+      vec2 src = bend(c), uv = src * .5 + .5;
       vec2 e = min(uv, 1. - uv); float inside = min(e.x, e.y);
+      float corner = pow(abs(c.x * c.y), .6);
       vec3 col;
       if (inside < 0.) {
         float d = -inside;
-        col = vec3(.012, .016, .018) + vec3(.03, .035, .03) * exp(-d * 30.);
-        col += vec3(.75, .8, .7) * exp(-d * 260.) * .5;
-        float band = exp(-d * 55.);
-        float gl = glint(vUv, vec2(.07, .86), vec2(.022, .05)) + glint(vUv, vec2(.16, .93), vec2(.05, .012))
-                 + glint(vUv, vec2(.93, .86), vec2(.022, .05)) + glint(vUv, vec2(.84, .93), vec2(.05, .012))
-                 + glint(vUv, vec2(.07, .14), vec2(.02, .04)) * .6 + glint(vUv, vec2(.93, .14), vec2(.02, .04)) * .6;
-        col += vec3(1., .9, .75) * gl * band * 1.3;
-        col += (hash(vUv * uRes) - .5) * .02;
+        col = vec3(.01, .013, .015);
+        float lip = exp(-pow((d - .006) / .0035, 2.));
+        float along = .06 + 1.2 * pow(corner, 1.6) + .35 * smoothstep(.55, .95, abs(c.x)) * smoothstep(.2, .8, abs(c.y));
+        col += vec3(1., .93, .8) * lip * along * 1.1;
+        col += vec3(.6, .65, .6) * exp(-d * 90.) * .12;
+        float strip = smoothstep(.02, .0, abs(vUv.y - .035)) * (smoothstep(.04, .08, vUv.x) * smoothstep(.2, .16, vUv.x) + smoothstep(.8, .84, vUv.x) * smoothstep(.96, .92, vUv.x));
+        col += vec3(1., .85, .65) * strip * .18 * smoothstep(0., .02, d);
+        col += (hash(vUv * uRes) - .5) * .015;
       } else {
         vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp);
-        float ca = .006 * r2 * r2 + .0012;
-        col = vec3(compose((src * (1. + ca)) * .5 + .5).r, compose(uv).g, compose((src * (1. - ca)) * .5 + .5).b);
-        col *= .55 + .45 * smoothstep(0., .16, inside);
-        col += vec3(.85, .9, 1.) * glint(vUv, vec2(.2, .86), vec2(.18, .05)) * .05;
-        col += vec3(.7, .8, .75) * exp(-inside * 140.) * .16;
-        col *= .95 + .05 * sin(gl_FragCoord.y * 1.4);
-        col += (hash(vUv * uRes + fract(uTime) * 91.) - .5) * .03;
+        float bl = (smoothstep(.12, 0., inside) * 7. + r2 * r2 * 4.) / uRes.y;
+        float ca = .009 * r2 * r2 + .0012;
+        vec3 sharp = vec3(at((src * (1. + ca)) * .5 + .5).r, at(uv).g, at((src * (1. - ca)) * .5 + .5).b);
+        vec3 soft = vec3(0.);
+        for (int i = 0; i < 8; i++){ float ang = float(i) * .785 + .3; soft += at(uv + vec2(cos(ang), sin(ang)) * bl * vec2(uRes.y / uRes.x, 1.)); }
+        soft /= 8.;
+        col = mix(sharp, soft, clamp(bl * uRes.y / 5., 0., .85));
+        vec3 halo = vec3(0.);
+        for (int i = 0; i < 8; i++){ float ang = float(i) * .785; halo += max(at(uv + vec2(cos(ang), sin(ang)) * 14. / uRes) - .32, 0.); }
+        col += halo / 8. * .55;
+        col = pow(col, vec3(1.08)) * 1.06 + vec3(0., .006, .008);
+        col *= .5 + .5 * smoothstep(0., .14, inside);
+        col += vec3(.9, .92, .85) * exp(-inside * 160.) * (.08 + .3 * corner);
+        col += vec3(.8, .85, .95) * exp(-pow((vUv.y - .92) * 9., 2.)) * smoothstep(.15, .35, vUv.x) * smoothstep(.75, .5, vUv.x) * .035;
+        col *= .965 + .035 * sin(gl_FragCoord.y * 1.5);
+        col += (hash(vUv * uRes + fract(uTime) * 91.) - .5) * .028;
       }
       gl_FragColor = vec4(col, 1.);
-    }`;
-  const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
-  const prog = gl.createProgram();
-  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = {};
-  ["uSpec", "uSpace", "uPlanet", "uHasSpace", "uHasPlanet", "uSpecOpaque", "uTime", "uK", "uRes", "uPar", "uSpecBox", "uPlanetBox"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
-  gl.uniform1i(U.uSpec, 0); gl.uniform1i(U.uSpace, 1); gl.uniform1i(U.uPlanet, 2);
+    }`);
 
-  function texture(unit, img) {
-    const t = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-    [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+  /* ---------- Layout (measured from the reference) ---------- */
+  let spaceT = null, sceneT = null, spaceImgT = null, spec, planetBox, rocks = [];
+  const OVER = 1.06;
+  function rocksFor(phone) {
+    // [x, y, size (of H), depth 0..1]
+    return phone ? [
+      [.12, .2, .016, .3], [.86, .22, .02, .4], [.2, .58, .025, .5], [.82, .55, .03, .6], [.7, .66, .02, .5], [.3, .66, .018, .4],
+      [.14, .82, .06, 1], [.9, .8, .05, .95], [.55, .26, .012, .2], [.08, .45, .02, .4], [.95, .4, .016, .3], [.4, .2, .01, .2],
+      [.62, .72, .014, .4], [.75, .3, .012, .3], [.25, .4, .012, .3], [.5, .9, .03, .9], [.04, .7, .03, .8], [.96, .64, .025, .7],
+    ] : [
+      [.3, .22, .02, .4], [.27, .46, .018, .5], [.34, .7, .025, .5], [.66, .22, .022, .4], [.72, .58, .032, .6], [.76, .66, .026, .55],
+      [.61, .82, .03, .6], [.42, .86, .02, .5], [.12, .86, .085, 1], [.9, .86, .07, .95], [.82, .74, .04, .8], [.96, .5, .03, .7],
+      [.06, .55, .028, .7], [.36, .1, .014, .3], [.53, .14, .012, .25], [.69, .9, .045, .85], [.22, .74, .02, .4], [.58, .32, .01, .25],
+    ];
   }
-  const load = (src) => new Promise((res) => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
-  const empty = new Uint8Array([0, 0, 0, 0]);
-  [0, 1, 2].forEach((u) => { gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, gl.createTexture()); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, empty); });
-
-  /* ---------- Layout ---------- */
-  let spec = { x: 0, y: 0, size: 0 }, planetBox = { x: 0, y: 0, r: 0 };
   function layout() {
-    phone = innerWidth < 760; W = innerWidth; H = innerHeight; PR = Math.min(devicePixelRatio || 1, 2);
+    phone = innerWidth < 760; W = innerWidth; H = innerHeight; PR = Math.min(devicePixelRatio || 1, 2); K = phone ? .2 : .32;
     canvas.width = Math.round(W * PR); canvas.height = Math.round(H * PR);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniform2f(U.uRes, canvas.width, canvas.height);
-    gl.uniform1f(U.uK, phone ? .2 : .28);
-    spec = phone ? { x: W * .5, y: H * .36, size: Math.min(W * 1.05, H * .56) } : { x: W * .5, y: H * .47, size: H * .74 };
-    planetBox = phone ? { x: W * .92, y: H * .02, r: W * .55 } : { x: W * .86, y: H * .22, r: H * .34 };
+    const sw = Math.round(canvas.width * OVER * .6), sh = Math.round(canvas.height * OVER * .6);
+    spaceT = target(sw, sh);
+    sceneT = target(canvas.width, canvas.height);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, spaceT.f); gl.viewport(0, 0, sw, sh);
+    gl.useProgram(SPACE.p); gl.uniform2f(SPACE.u("uRes"), sw, sh); gl.uniform1f(SPACE.u("uPhone"), phone ? 1 : 0);
+    draw(SPACE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    spec = phone ? { x: W * .5, y: H * .43, size: Math.min(W * .98, H * .48) } : { x: W * .51, y: H * .44, size: H * .76 };
+    planetBox = phone ? { x: W * .98, y: H * .06, r: W * .62 } : { x: W * .86, y: H * .31, r: H * .33 };
+    rocks = rocksFor(phone).map(([x, y, s, z], i) => ({ x: x * W, y: y * H, r: s * H, seed: i * 3.7 + 1.1, z, rot: i * 1.3, w: (i % 2 ? 1 : -1) * (.05 + (i % 5) * .02) }));
+    document.documentElement.style.setProperty("--u", `${(phone ? .95 : 1) * H / 100}px`);
     const set = (id, css) => Object.assign($(id).style, css);
     if (!phone) {
-      set("#geo", { left: "8.5%", top: "21%" }); set("#cam", { right: "8.5%", top: "21%" });
-      set("#p1", { left: "6.5%", top: "24%" }); set("#p2", { right: "6.5%", top: "24%" }); set("#p3", { left: "8.5%", top: "29%" }); set("#p4", { right: "13%", top: "53%" });
-      set("#brand", { left: "6.8%", top: "43%" });
-      set("#bl", { left: "7%", bottom: "11%" }); set("#br", { right: "7%", bottom: "11%" });
+      set("#geo", { left: "10.5%", top: "14%" }); set("#cam", { right: "10.5%", top: "14%" });
+      set("#p1", { left: "8.6%", top: "17.4%" }); set("#p2", { left: "10.8%", top: "23.5%" }); set("#p3", { right: "8.2%", top: "17.4%" }); set("#p4", { right: "8.4%", top: "51.4%" }); set("#p5", { right: "11.8%", top: "17.4%", display: "none" });
+      set("#brand", { left: "8.6%", top: "38%" });
+      set("#bl", { left: "10%", top: "81.5%" }); set("#br", { right: "10%", top: "81.5%" });
     } else {
-      set("#geo", { left: "10%", top: "10%" }); set("#cam", { right: "10%", top: "10%" });
-      set("#p1", { left: "5%", top: "8%" }); set("#p2", { right: "5%", top: "8%" }); set("#p3", { left: "5%", top: "14%" }); set("#p4", { right: "5%", top: "14%" });
-      set("#brand", { left: "0", right: "0", top: "66%", textAlign: "center" });
-      set("#mail", { position: "fixed", left: "0", right: "0", bottom: "8%", justifyContent: "center", display: "flex" });
+      set("#geo", { left: "12%", top: "12.4%" }); set("#cam", { right: "12%", top: "12.4%" });
+      set("#p1", { left: "7%", top: "10.6%" }); set("#p2", { right: "7%", top: "10.6%" }); set("#p3", { left: "7%", top: "19.3%" }); set("#p4", { right: "7%", top: "19.3%" }); set("#p5", { display: "none" });
+      set("#brand", { left: "0", right: "0", top: "67.5%", textAlign: "center" });
+      set("#mail", { position: "fixed", left: "0", right: "0", top: "89.8%", justifyContent: "center", display: "flex" });
     }
-    const wave = $("#wave"), ww = phone ? W * .62 : W * .38;
-    wave.width = ww * PR; wave.height = 44 * PR;
-    Object.assign(wave.style, { width: `${ww}px`, height: "44px", left: `${(W - ww) / 2 - (phone ? 18 : 30)}px`, bottom: phone ? "13.5%" : "10.5%" });
-    set("#bpm", { left: `${(W + ww) / 2 - (phone ? 10 : 22)}px`, bottom: phone ? "calc(13.5% + 15px)" : "calc(10.5% + 15px)" });
-    $("#meter").innerHTML = Array.from({ length: 14 }, (_, i) => `<i class="${i > 10 ? "off" : ""}"></i>`).join("") + "<b></b>";
-    if (phone) $("#meter").style.justifyContent = "center";
+    const wave = $("#wave"), ww = W * .44, wh = phone ? 34 : 50;
+    wave.width = ww * PR; wave.height = wh * PR;
+    const wx = phone ? W * .2 : W * .225, wy = phone ? H * .862 : H * .855;
+    Object.assign(wave.style, { width: `${ww}px`, height: `${wh}px`, left: `${wx}px`, top: `${wy - wh / 2}px` });
+    set("#bpm", { left: `${wx + ww + 8}px`, top: `${wy - 8}px` });
+    $("#meter").innerHTML = Array.from({ length: 16 }, (_, i) => `<i class="${i > 12 ? "off" : ""}"></i>`).join("") + "<s></s><b></b>";
   }
   addEventListener("resize", layout);
 
   // Where a flat point lands on screen after the lens (inverse of bend()).
   function onScreen(x, y) {
-    const k = phone ? .2 : .28, asp = W / H, norm = asp * asp + 1;
-    const tx = (x / W) * 2 - 1, ty = (y / H) * 2 - 1;
+    const asp = W / H, norm = asp * asp + 1, tx = (x / W) * 2 - 1, ty = (y / H) * 2 - 1;
     let px = tx, py = ty;
-    for (let i = 0; i < 10; i++) { const r2 = ((px * asp) ** 2 + py * py) / norm, s = 1 + k * r2 + k * .7 * r2 * r2; px = tx / s; py = ty / s; }
+    for (let i = 0; i < 12; i++) { const r2 = ((px * asp) ** 2 + py * py) / norm, s = 1 + K * r2 + K * .75 * r2 * r2; px = tx / s; py = ty / s; }
     return [(px + 1) / 2 * W, (py + 1) / 2 * H];
   }
 
   /* ---------- HUD lines and waveform ---------- */
-  const lines = $("#lines");
+  const lines = $("#lines"), G = (a) => `rgba(178,245,168,${a})`;
   function drawLines(sx, sy) {
-    const [cx, cy] = onScreen(sx, sy), [ex] = onScreen(sx + spec.size * .43, sy), R = Math.abs(ex - cx);
-    let h = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(168,240,160,.32)" stroke-dasharray="2 5"/>`;
-    h += `<path d="M${cx - 6},${cy - R - 14} L${cx + 6},${cy - R - 14} L${cx},${cy - R - 4} Z" fill="none" stroke="rgba(168,240,160,.7)"/>`;
+    const [cx, cy] = onScreen(sx, sy), [ex] = onScreen(sx + spec.size * (phone ? .5 : .44), sy), R = Math.abs(ex - cx);
+    let h = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${G(.38)}" stroke-width="1" stroke-dasharray="1.5 5"/>`;
+    h += `<path d="M${cx - 6},${cy - R - 12} L${cx + 6},${cy - R - 12} L${cx},${cy - R - 3} Z" fill="none" stroke="${G(.8)}"/>`;
+    h += `<line x1="${cx}" y1="${cy - R - 3}" x2="${cx}" y2="${cy - R + 9}" stroke="${G(.6)}"/>`;
+    for (const k of [-.5, 0, .5, 1]) { const a = k * Math.PI; h += `<line x1="${cx + Math.cos(a) * (R - 4)}" y1="${cy + Math.sin(a) * (R - 4)}" x2="${cx + Math.cos(a) * (R + 4)}" y2="${cy + Math.sin(a) * (R + 4)}" stroke="${G(.55)}"/>`; }
     if (!phone) {
-      h += `<path d="M${cx},${cy + R + 4} L${cx - 4},${cy + R + 12} L${cx + 4},${cy + R + 12} Z" fill="rgba(168,240,160,.7)"/>`;
-      const sx2 = cx + R + 70;
-      for (let i = 0; i <= 12; i++) { const y = cy - R * .55 + (i / 12) * R * 1.1; h += `<line x1="${sx2}" y1="${y}" x2="${sx2 + (i % 4 ? 5 : 11)}" y2="${y}" stroke="rgba(168,240,160,${i % 4 ? .35 : .7})"/>`; }
-      h += `<line x1="${sx2}" y1="${cy - R * .55}" x2="${sx2}" y2="${cy + R * .55}" stroke="rgba(168,240,160,.35)"/>`;
-      [[.16, -.2, -.62, $("#c1")], [.2, .24, .72, $("#c2")]].forEach(([ax, ay, oy, el]) => {
+      h += `<path d="M${cx - 4},${cy + R + 14} L${cx + 4},${cy + R + 14} L${cx},${cy + R + 5} Z" fill="${G(.75)}"/>`;
+      const rx = W * .925, top = H * .3, bot = H * .58;
+      h += `<line x1="${rx}" y1="${top}" x2="${rx}" y2="${bot}" stroke="${G(.5)}"/><line x1="${rx - 10}" y1="${top}" x2="${rx}" y2="${top}" stroke="${G(.6)}"/><line x1="${rx - 10}" y1="${bot}" x2="${rx}" y2="${bot}" stroke="${G(.6)}"/>`;
+      for (let i = 1; i < 8; i++) { const y = top + (i / 8) * (bot - top); h += `<line x1="${rx - (i % 4 ? 5 : 9)}" y1="${y}" x2="${rx}" y2="${y}" stroke="${G(i % 4 ? .4 : .65)}"/>`; }
+      const pts = [[.14, -.08, W * .74, H * .26, $("#c1")], [.18, .19, W * .755, H * .645, $("#c2")]];
+      for (const [ax, ay, lx, ly, el] of pts) {
         const [px, py] = onScreen(sx + ax * spec.size, sy + ay * spec.size);
-        const lx = cx + R * (oy > 0 ? 1.12 : .95), ly = cy + R * oy;
-        el.style.left = `${lx + 12}px`; el.style.top = `${ly - 10}px`;
-        h += `<polyline points="${px},${py} ${lx - 26},${ly} ${lx + 6},${ly}" fill="none" stroke="rgba(168,240,160,.6)"/><circle cx="${px}" cy="${py}" r="2" fill="rgba(168,240,160,.9)"/>`;
-      });
+        el.style.left = `${lx + 10}px`; el.style.top = `${ly - 9}px`;
+        h += `<polyline points="${px},${py} ${lx - 18},${ly} ${lx + 2},${ly}" fill="none" stroke="${G(.65)}"/><circle cx="${px}" cy="${py}" r="1.6" fill="${G(.9)}"/>`;
+      }
     }
     lines.innerHTML = h;
   }
@@ -282,51 +379,61 @@
     const w = wave.width, h = wave.height, mid = h / 2, pr = PR;
     wg.clearRect(0, 0, w, h);
     const beat = Math.pow(1 - (((t * 124) / 60) % 1), 3);
-    wg.strokeStyle = "rgba(168,240,160,.9)"; wg.lineWidth = pr; wg.shadowColor = "rgba(140,255,140,.8)"; wg.shadowBlur = 6 * pr;
+    wg.strokeStyle = G(.95); wg.lineWidth = pr; wg.shadowColor = G(.9); wg.shadowBlur = 5 * pr;
     wg.beginPath();
-    for (let x = 0; x < w; x += 2 * pr) {
-      const u = x / w, env = Math.pow(Math.sin(u * Math.PI), .8);
-      const a = env * Math.abs(Math.sin(u * 211 + t * 9) * Math.sin(u * 37 - t * 4) * Math.sin(u * 13 + t)) * (.25 + beat * .75) * mid * .95 + .6 * pr;
+    for (let x = 0; x < w; x += 2.2 * pr) {
+      const u = x / w, env = Math.pow(Math.sin(u * Math.PI), .9) * (.5 + .5 * Math.sin(u * 9 + 1.3) ** 2);
+      const a = env * Math.abs(Math.sin(u * 211 + t * 9) * Math.sin(u * 37 - t * 4) * Math.sin(u * 13 + t)) * (.3 + beat * .7) * mid * .95 + .5 * pr;
       wg.moveTo(x, mid - a); wg.lineTo(x, mid + a);
     }
     wg.stroke();
-    wg.shadowBlur = 0; wg.strokeStyle = "rgba(168,240,160,.35)"; wg.setLineDash([2 * pr, 3 * pr]);
-    wg.beginPath(); wg.moveTo(0, mid); wg.lineTo(w, mid); wg.stroke(); wg.setLineDash([]);
+    wg.shadowBlur = 0; wg.fillStyle = G(.5);
+    for (let x = 0; x < w; x += 4 * pr) wg.fillRect(x, mid - .5 * pr, pr, pr);
   }
 
-  /* ---------- Pointer and tilt parallax ---------- */
+  /* ---------- Parallax ---------- */
   const look = { x: 0, y: 0, tx: 0, ty: 0 };
   addEventListener("pointermove", (e) => { look.tx = (e.clientX / innerWidth) * 2 - 1; look.ty = (e.clientY / innerHeight) * 2 - 1; });
   addEventListener("deviceorientation", (e) => { if (e.gamma != null) { look.tx = Math.max(-1, Math.min(1, e.gamma / 30)); look.ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); } });
 
   /* ---------- Go ---------- */
+  const load = (src) => new Promise((res) => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
   Promise.all([
-    load(ASSETS.specimen.src).then((i) => i ? { i, opaque: ASSETS.specimen.opaque } : load(ASSETS.specimen.fallback).then((f) => ({ i: f, opaque: true }))),
-    load(ASSETS.space.src), load(ASSETS.planet.src),
-    document.fonts ? document.fonts.ready : null,
-  ]).then(([s, space, planet]) => {
-    if (s.i) texture(0, s.i);
-    gl.uniform1f(U.uSpecOpaque, s.opaque ? 1 : 0);
-    if (space) texture(1, space);
-    if (planet) texture(2, planet);
-    gl.uniform1f(U.uHasSpace, space ? 1 : 0);
-    gl.uniform1f(U.uHasPlanet, planet ? 1 : 0);
+    load(ASSETS.specimen.src).then((i) => (i ? { i, opaque: ASSETS.specimen.opaque } : load(ASSETS.specimen.fallback).then((f) => ({ i: f, opaque: true })))),
+    load(ASSETS.space.src), load(ASSETS.planet.src), document.fonts ? document.fonts.ready : null,
+  ]).then(([s, spaceImg, planetImg]) => {
+    const specT = tex(1, 1, s.i), planetT = planetImg ? tex(1, 1, planetImg) : tex(1, 1, new Uint8Array(4));
+    if (spaceImg) spaceImgT = tex(1, 1, spaceImg);
     layout();
     $("#hud").classList.add("on");
+    const R4 = new Float32Array(ROCKS * 4), R3 = new Float32Array(ROCKS * 3);
     const t0 = performance.now();
     (function frame(now) {
       const t = frozen ?? (still ? 12 : (now - t0) / 1000);
       look.x += (look.tx - look.x) * .04; look.y += (look.ty - look.y) * .04;
-      // The specimen floats: a slow drift, a gentle turn, a breath.
       const breathe = 1 + Math.sin(t * .5) * .012;
-      const sx = spec.x + Math.sin(t * .23) * W * .004, sy = spec.y + Math.sin(t * .31) * H * .008;
-      gl.uniform4f(U.uSpecBox, sx * PR, sy * PR, spec.size * breathe * PR, Math.sin(t * .11) * .05);
-      gl.uniform4f(U.uPlanetBox, planetBox.x * PR, planetBox.y * PR, planetBox.r * PR, 0);
-      gl.uniform2f(U.uPar, look.x, look.y);
-      gl.uniform1f(U.uTime, t);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      drawLines(sx, sy);
-      drawWave(t);
+      const sx = spec.x + Math.sin(t * .23) * W * .004, sy = spec.y + Math.sin(t * .31) * H * .007;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, sceneT.f); gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.useProgram(SCENE.p);
+      bind(0, spaceImgT || spaceT.t); bind(1, specT); bind(2, planetT);
+      const u = SCENE.u;
+      gl.uniform1i(u("uSpace"), 0); gl.uniform1i(u("uSpec"), 1); gl.uniform1i(u("uPlanet"), 2);
+      gl.uniform1f(u("uHasPlanet"), planetImg ? 1 : 0); gl.uniform1f(u("uSpecOpaque"), s.opaque ? 1 : 0);
+      gl.uniform1f(u("uTime"), t); gl.uniform1f(u("uSpaceIsImage"), spaceImgT ? 1 : 0); gl.uniform1f(u("uOver"), spaceImgT ? 1.04 : OVER);
+      gl.uniform2f(u("uRes"), canvas.width, canvas.height); gl.uniform2f(u("uPar"), look.x, look.y);
+      gl.uniform4f(u("uSpecBox"), sx * PR, sy * PR, spec.size * breathe * PR, Math.sin(t * .11) * .05);
+      gl.uniform4f(u("uPlanetBox"), planetBox.x * PR, planetBox.y * PR, planetBox.r * PR, 0);
+      rocks.forEach((r, i) => {
+        R4.set([(r.x + Math.sin(t * .06 + i) * r.r * .6) * PR, (r.y + Math.cos(t * .05 + i * 2) * r.r * .5) * PR, r.r * PR, r.seed], i * 4);
+        R3.set([r.z, r.rot + t * r.w, Math.max(0, r.z - .75) * 26 * PR], i * 3);
+      });
+      gl.uniform4fv(u("uRock[0]"), R4); gl.uniform3fv(u("uRockZ[0]"), R3);
+      draw(SCENE);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.useProgram(LENS.p); bind(0, sceneT.t);
+      gl.uniform1i(LENS.u("uScene"), 0); gl.uniform2f(LENS.u("uRes"), canvas.width, canvas.height); gl.uniform1f(LENS.u("uK"), K); gl.uniform1f(LENS.u("uTime"), t);
+      draw(LENS);
+      drawLines(sx, sy); drawWave(t);
       $("#lat").textContent = `${(23.9 + Math.sin(t * .07) * .2).toFixed(1)}°`;
       $("#lon").textContent = `${(146.7 + t * .002).toFixed(1)}°`;
       document.body.dataset.ready = "1";

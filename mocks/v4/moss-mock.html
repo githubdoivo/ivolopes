@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MOSS · signal acquired</title>
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* A fidelity test: the page IS the mock (text still baked in), with light
+     motion on top. Once a text-free, upscaled version exists, the text comes
+     back as live HTML in the same glowing style. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; cursor: none; }
+  .stage { position: fixed; left: 50%; top: 50%; transform-origin: 50% 50%; }
+  .stage img { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
+  .breathe { animation: breathe 14s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: scale(1.012); } }
+  /* Pulses on the baked waveform at 124 BPM. */
+  .beat { position: absolute; mix-blend-mode: screen; pointer-events: none; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(150, 255, 150, .45), rgba(150, 255, 150, 0)); animation: beat .4839s cubic-bezier(.2, .8, .3, 1) infinite; }
+  @keyframes beat { 0% { opacity: .9; } 100% { opacity: .05; } }
+  /* A slow green scan across the glass. */
+  .sweep { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; overflow: hidden; }
+  .sweep::before { content: ""; position: absolute; left: 0; right: 0; height: 18%; top: -20%;
+    background: linear-gradient(180deg, transparent, rgba(120, 255, 150, .05) 60%, rgba(160, 255, 170, .09) 70%, transparent);
+    animation: sweep 9s linear infinite; }
+  @keyframes sweep { to { top: 110%; } }
+  .grain { position: fixed; inset: -50%; pointer-events: none; opacity: .09; mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grain 1s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0, 0); } 33% { transform: translate(-3%, 2%); } 66% { transform: translate(2%, -3%); } }
+  .scan { position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .12) 0 1px, transparent 1px 3px); }
+  @media (max-aspect-ratio: 4/5) { .scan { opacity: .4; } }
+  .flicker { position: fixed; inset: 0; pointer-events: none; background: #000; opacity: 0; }
+  .mail { position: absolute; display: block; }
+  .mail:focus-visible { outline: 1px solid #9cf59a; outline-offset: 4px; }
+  /* The old tech reticle, as the cursor. */
+  .reticle { position: fixed; width: 54px; height: 54px; margin: -27px 0 0 -27px; pointer-events: none; opacity: 0; transition: opacity .3s; border: 1px solid rgba(160, 245, 160, .75); box-shadow: 0 0 8px rgba(140, 255, 140, .35); }
+  .reticle::before, .reticle::after { content: ""; position: absolute; background: rgba(160, 245, 160, .75); }
+  .reticle::before { left: 50%; top: -10px; bottom: -10px; width: 1px; }
+  .reticle::after { top: 50%; left: -10px; right: -10px; height: 1px; }
+  .reticle span { position: absolute; left: 62px; top: -4px; white-space: nowrap; font: 13px "Share Tech Mono", monospace; letter-spacing: .12em; color: #b2f5a8; text-shadow: 0 0 8px rgba(140, 255, 140, .6); }
+  .reticle.on { opacity: 1; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (prefers-reduced-motion: reduce) { .breathe, .beat, .sweep::before, .grain { animation: none; } }
+</style>
+</head>
+<body>
+<main class="sr"><h1>MOSS</h1><p>DJ and producer. Transmission soon.</p></main>
+<div class="stage" id="stage">
+  <img id="art" alt="" aria-hidden="true">
+  <div class="sweep"></div>
+  <div class="beat" id="beat"></div>
+  <a class="mail" id="mail" href="mailto:mail@ivolopes.com" aria-label="mail@ivolopes.com"></a>
+</div>
+<div class="grain"></div>
+<div class="scan"></div>
+<div class="flicker" id="flicker"></div>
+<div class="reticle" id="reticle" aria-hidden="true"><span id="coords"></span></div>
+<script>
+(function () {
+  // Image sizes and where things sit in each (in image pixels).
+  const ART = {
+    desk: { src: "assets/mock-desk.png", w: 1232, h: 748, mail: [84, 462, 160, 24], beat: [297, 626, 520, 60] },
+    phone: { src: "assets/mock-phone.png", w: 344, h: 768, mail: [110, 706, 124, 22], beat: [66, 640, 152, 40] },
+  };
+  const $ = (s) => document.getElementById(s);
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let cur = null;
+  function fit() {
+    const a = innerWidth / innerHeight < .8 ? ART.phone : ART.desk;
+    if (a !== cur) { cur = a; $("art").src = a.src; }
+    // Cover the screen, keeping the centre; the mock's dark rim absorbs the crop.
+    const s = Math.max(innerWidth / a.w, innerHeight / a.h);
+    const st = $("stage");
+    Object.assign(st.style, { width: `${a.w * s}px`, height: `${a.h * s}px`, marginLeft: `${-a.w * s / 2}px`, marginTop: `${-a.h * s / 2}px` });
+    st.classList.toggle("breathe", !still);
+    const put = (el, [x, y, w, h]) => Object.assign(el.style, { left: `${x * s}px`, top: `${y * s}px`, width: `${w * s}px`, height: `${h * s}px` });
+    put($("mail"), a.mail); put($("beat"), a.beat);
+  }
+  addEventListener("resize", fit); fit();
+
+  // The reticle follows the pointer and reads out coordinates.
+  const ret = $("reticle"), coords = $("coords");
+  addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    ret.style.left = `${e.clientX}px`; ret.style.top = `${e.clientY}px`; ret.classList.add("on");
+    coords.textContent = `${(23.9 + (e.clientY / innerHeight - .5) * -.4).toFixed(2)}°  ${(146.7 + (e.clientX / innerWidth - .5) * .6).toFixed(2)}°`;
+  });
+  document.addEventListener("pointerleave", () => ret.classList.remove("on"));
+  if (!matchMedia("(pointer: fine)").matches) document.documentElement.style.cursor = "auto";
+
+  // Now and then, a faint signal flicker.
+  if (!still) (function flick() {
+    setTimeout(() => {
+      const f = $("flicker");
+      f.animate([{ opacity: 0 }, { opacity: .18 }, { opacity: 0 }, { opacity: .1 }, { opacity: 0 }], { duration: 260 });
+      flick();
+    }, 5000 + Math.random() * 8000);
+  })();
+})();
+</script>
+</body>
+</html>

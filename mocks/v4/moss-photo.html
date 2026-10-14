@@ -16,6 +16,9 @@
   body { color: var(--g); font: 13px/1.35 var(--mono); -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
   #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .ov { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; z-index: 3; }
+  #glass { mix-blend-mode: screen; opacity: .55; z-index: 2; }
+  .hud { z-index: 1; }
   .hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 0 6px rgba(150, 255, 150, .5); opacity: 0; transition: opacity 1.6s .3s; }
   .hud.on { opacity: 1; }
   .hud a { pointer-events: auto; }
@@ -61,6 +64,8 @@
 </head>
 <body>
 <canvas id="view" aria-hidden="true"></canvas>
+<img class="ov" id="glass" src="assets/moss-glass.jpg" alt="" aria-hidden="true">
+<img class="ov" id="frame" src="assets/moss-frame.png" alt="" aria-hidden="true">
 <main class="sr"><h1>MOSS</h1><p>DJ and producer. Transmission soon. Contact: mail@ivolopes.com</p></main>
 
 <div class="hud" id="hud">
@@ -92,6 +97,7 @@
     specimen: { src: "assets/moss-specimen.png", fallback: "assets/placeholder-specimen.png", opaque: false },
     space: { src: "assets/moss-space.jpg" },
     planet: { src: "assets/moss-planet.png" },
+    rocks: { src: "assets/moss-rocks.png", size: [1774, 887], boxes: [[72, 55, 599, 494], [780, 128, 406, 370], [1458, 147, 237, 309], [1111, 451, 579, 378], [117, 548, 476, 280], [697, 553, 269, 262]] },
   };
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const q = new URLSearchParams(location.search);
@@ -166,32 +172,32 @@
   const ROCKS = 18;
   const SCENE = program(`
     uniform sampler2D uSpace, uSpec, uPlanet;
-    uniform float uHasPlanet, uSpecOpaque, uTime, uOver, uSpaceIsImage;
+    uniform float uHasPlanet, uSpecOpaque, uTime, uOver, uSpaceIsImage; uniform vec2 uSpaceSize;
     uniform vec2 uRes, uPar;
     uniform vec4 uSpecBox, uPlanetBox;
     uniform vec4 uRock[${ROCKS}];
     uniform vec3 uRockZ[${ROCKS}];
+    uniform sampler2D uRocks; uniform vec4 uRockRect[6];
+    vec4 rockAt(int k, vec2 uv){ vec4 r = uRockRect[0];
+      if (k == 1) r = uRockRect[1]; else if (k == 2) r = uRockRect[2]; else if (k == 3) r = uRockRect[3]; else if (k == 4) r = uRockRect[4]; else if (k == 5) r = uRockRect[5];
+      if (uv.x < 0. || uv.y < 0. || uv.x > 1. || uv.y > 1.) return vec4(0.);
+      return texture2D(uRocks, r.xy + uv * r.zw); }
     vec3 rock(vec2 px, vec3 col){
       for (int i = 0; i < ${ROCKS}; i++){
         vec4 r = uRock[i]; vec3 z = uRockZ[i];
         vec2 d = px - r.xy - uPar * uRes.y * (.004 + z.x * .05);
-        float R = r.z * 1.4 + z.z * 2.; if (dot(d, d) > R * R) continue;
-        float c = cos(z.y), s = sin(z.y); d = mat2(c, -s, s, c) * d / r.z;
-        float ang = atan(d.y, d.x), rr = length(d);
-        vec2 dir = vec2(cos(ang), sin(ang));
-        float shape = 1. + .44 * (noise(dir * 1.8 + r.w) - .5) + .16 * (noise(dir * 5. + r.w * 2.) - .5);
-        float soft = max(.03, z.z / r.z);
-        float a = smoothstep(shape + soft, shape - soft, rr);
-        if (a <= 0.) continue;
-        vec2 qq = d / shape; float h = sqrt(max(0., 1. - dot(qq, qq)));
-        vec3 n = normalize(vec3(qq + (vec2(noise(d * 6. + r.w), noise(d * 6. + r.w + 9.)) - .5) * .7, h));
-        float crat = smoothstep(.55, .75, noise(d * 3.5 + r.w * 3.));
-        vec3 base = mix(vec3(.12, .11, .105), vec3(.06, .055, .06), crat) * (.8 + .4 * noise(d * 12. + r.w));
-        float key = max(dot(n, normalize(vec3(-.6, -.55, .6))), 0.);
-        float rim = pow(max(dot(n, normalize(vec3(.8, .1, .25))), 0.), 3.);
-        vec3 lit = base * (.15 + 1.6 * key) + vec3(.25, .55, .5) * rim * .35 + vec3(.4, .25, .6) * pow(1. - h, 3.) * .2;
-        lit *= mix(.5, .9, z.x);
-        col = mix(col, lit, a);
+        float R = r.z * .8 + z.z * 2.; if (dot(d, d) > R * R) continue;
+        float c = cos(z.y), s = sin(z.y); d = mat2(c, -s, s, c) * d;
+        int k = int(mod(r.w, 6.));
+        vec2 asp = vec2(1.); vec4 rr = uRockRect[0];
+        vec2 uv = d / r.z + .5;
+        vec4 t = rockAt(k, uv);
+        if (z.z > .5) {           // near rocks are out of focus
+          vec2 o = vec2(z.z / r.z);
+          t = (t + rockAt(k, uv + vec2(o.x, 0.)) + rockAt(k, uv - vec2(o.x, 0.)) + rockAt(k, uv + vec2(0., o.y)) + rockAt(k, uv - vec2(0., o.y))) / 5.;
+        }
+        t.rgb *= mix(.45, 1., z.x) * 1.15;
+        col = mix(col, t.rgb, t.a);
       }
       return col;
     }
@@ -212,6 +218,7 @@
     void main(){
       vec2 px = vec2(vUv.x, 1. - vUv.y) * uRes;
       vec2 su = (px / uRes - .5) / uOver + .5 + uPar * .006;
+      if (uSpaceIsImage > .5) { float sc = max(uRes.x / uSpaceSize.x, uRes.y / uSpaceSize.y) * uOver; su = (px - uRes * .5) / (uSpaceSize * sc) + .5 + uPar * .006; }
       vec3 col = texture2D(uSpace, vec2(su.x, uSpaceIsImage > .5 ? su.y : 1. - su.y)).rgb;
       vec2 pd = (px - uPlanetBox.xy - uPar * uRes.y * .012) / uPlanetBox.z;
       float pr = length(pd);
@@ -254,7 +261,10 @@
   /* ---------- Pass 3: the visor (lens, blur, glow, glass lip, reflections) ---------- */
   const LENS = program(`
     uniform sampler2D uScene; uniform vec2 uRes; uniform float uK, uTime;
-    vec2 bend(vec2 c){ vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp); return c * (1. + uK * r2 + uK * .75 * r2 * r2); }
+    float sAt(float r2){ return 1. + uK * r2 + uK * .75 * r2 * r2; }
+    vec2 bend(vec2 c){ vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float n = dot(asp, asp), r2 = dot(a, a) / n;
+      float edge = max(sAt(asp.x * asp.x / n), sAt(1. / n));      // keep the middle of every edge inside the picture
+      return c * sAt(r2) / edge; }
     vec3 at(vec2 uv){ return texture2D(uScene, uv).rgb; }
     void main(){
       vec2 c = vUv * 2. - 1.;
@@ -263,15 +273,7 @@
       float corner = pow(abs(c.x * c.y), .6);
       vec3 col;
       if (inside < 0.) {
-        float d = -inside;
-        col = vec3(.01, .013, .015);
-        float lip = exp(-pow((d - .006) / .0035, 2.));
-        float along = .06 + 1.2 * pow(corner, 1.6) + .35 * smoothstep(.55, .95, abs(c.x)) * smoothstep(.2, .8, abs(c.y));
-        col += vec3(1., .93, .8) * lip * along * 1.1;
-        col += vec3(.6, .65, .6) * exp(-d * 90.) * .12;
-        float strip = smoothstep(.02, .0, abs(vUv.y - .035)) * (smoothstep(.04, .08, vUv.x) * smoothstep(.2, .16, vUv.x) + smoothstep(.8, .84, vUv.x) * smoothstep(.96, .92, vUv.x));
-        col += vec3(1., .85, .65) * strip * .18 * smoothstep(0., .02, d);
-        col += (hash(vUv * uRes) - .5) * .015;
+        col = vec3(.004, .006, .007);
       } else {
         vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp);
         float bl = (smoothstep(.12, 0., inside) * 7. + r2 * r2 * 4.) / uRes.y;
@@ -284,9 +286,8 @@
         vec3 halo = vec3(0.);
         for (int i = 0; i < 8; i++){ float ang = float(i) * .785; halo += max(at(uv + vec2(cos(ang), sin(ang)) * 14. / uRes) - .32, 0.); }
         col += halo / 8. * .55;
-        col = pow(col, vec3(1.08)) * 1.06 + vec3(0., .006, .008);
-        col *= .5 + .5 * smoothstep(0., .14, inside);
-        col += vec3(.9, .92, .85) * exp(-inside * 160.) * (.08 + .3 * corner);
+        col = pow(col, vec3(1.12)) * .98 + vec3(0., .004, .006);
+        col *= .45 + .55 * smoothstep(0., .2, inside);
         col += vec3(.8, .85, .95) * exp(-pow((vUv.y - .92) * 9., 2.)) * smoothstep(.15, .35, vUv.x) * smoothstep(.75, .5, vUv.x) * .035;
         col *= .965 + .035 * sin(gl_FragCoord.y * 1.5);
         col += (hash(vUv * uRes + fract(uTime) * 91.) - .5) * .028;
@@ -310,7 +311,7 @@
     ];
   }
   function layout() {
-    phone = innerWidth < 760; W = innerWidth; H = innerHeight; PR = Math.min(devicePixelRatio || 1, 2); K = phone ? .2 : .32;
+    phone = innerWidth < 760; W = innerWidth; H = innerHeight; PR = Math.min(devicePixelRatio || 1, 2); K = phone ? .1 : .16;
     canvas.width = Math.round(W * PR); canvas.height = Math.round(H * PR);
     const sw = Math.round(canvas.width * OVER * .6), sh = Math.round(canvas.height * OVER * .6);
     spaceT = target(sw, sh);
@@ -319,36 +320,40 @@
     gl.useProgram(SPACE.p); gl.uniform2f(SPACE.u("uRes"), sw, sh); gl.uniform1f(SPACE.u("uPhone"), phone ? 1 : 0);
     draw(SPACE);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    spec = phone ? { x: W * .5, y: H * .43, size: Math.min(W * .98, H * .48) } : { x: W * .51, y: H * .44, size: H * .76 };
-    planetBox = phone ? { x: W * .98, y: H * .06, r: W * .62 } : { x: W * .86, y: H * .31, r: H * .33 };
-    rocks = rocksFor(phone).map(([x, y, s, z], i) => ({ x: x * W, y: y * H, r: s * H, seed: i * 3.7 + 1.1, z, rot: i * 1.3, w: (i % 2 ? 1 : -1) * (.05 + (i % 5) * .02) }));
+    spec = phone ? { x: W * .5, y: H * .43, size: Math.min(W * .98, H * .48) } : { x: W * .52, y: H * .45, size: H * .76 };
+    planetBox = phone ? { x: W * .96, y: H * .08, r: W * .66 } : { x: W * .86, y: H * .3, r: H * .37 };
+    rocks = rocksFor(phone).map(([x, y, s, z], i) => ({ x: x * W, y: y * H, r: s * H * 2.6, seed: i % 6, z, rot: i * 1.3, w: (i % 2 ? 1 : -1) * (.03 + (i % 5) * .012) }));
     document.documentElement.style.setProperty("--u", `${(phone ? .95 : 1) * H / 100}px`);
     const set = (id, css) => Object.assign($(id).style, css);
     if (!phone) {
-      set("#geo", { left: "10.5%", top: "14%" }); set("#cam", { right: "10.5%", top: "14%" });
-      set("#p1", { left: "8.6%", top: "17.4%" }); set("#p2", { left: "10.8%", top: "23.5%" }); set("#p3", { right: "8.2%", top: "17.4%" }); set("#p4", { right: "8.4%", top: "51.4%" }); set("#p5", { right: "11.8%", top: "17.4%", display: "none" });
-      set("#brand", { left: "8.6%", top: "38%" });
-      set("#bl", { left: "10%", top: "81.5%" }); set("#br", { right: "10%", top: "81.5%" });
+      set("#geo", { left: "8.8%", top: "12.8%" }); set("#cam", { right: "8.8%", top: "12.8%" });
+      set("#p1", { left: "6.9%", top: "16.4%" }); set("#p2", { left: "9.2%", top: "21.5%" }); set("#p3", { right: "6.4%", top: "16.4%" }); set("#p4", { right: "4.8%", top: "51%" }); set("#p5", { display: "none" });
+      set("#brand", { left: "7.6%", top: "38%" });
+      set("#bl", { left: "9.6%", top: "76%" }); set("#br", { right: "9.6%", top: "76%" });
     } else {
-      set("#geo", { left: "12%", top: "12.4%" }); set("#cam", { right: "12%", top: "12.4%" });
-      set("#p1", { left: "7%", top: "10.6%" }); set("#p2", { right: "7%", top: "10.6%" }); set("#p3", { left: "7%", top: "19.3%" }); set("#p4", { right: "7%", top: "19.3%" }); set("#p5", { display: "none" });
+      set("#geo", { left: "13%", top: "13.5%" }); set("#cam", { right: "13%", top: "13.5%" });
+      set("#p1", { left: "9%", top: "11.5%" }); set("#p2", { right: "9%", top: "11.5%" }); set("#p3", { left: "7%", top: "21%" }); set("#p4", { right: "7%", top: "21%" }); set("#p5", { display: "none" });
       set("#brand", { left: "0", right: "0", top: "67.5%", textAlign: "center" });
-      set("#mail", { position: "fixed", left: "0", right: "0", top: "89.8%", justifyContent: "center", display: "flex" });
+      set("#mail", { position: "fixed", left: "0", right: "0", top: "89.4%", justifyContent: "center", display: "flex" });
     }
     const wave = $("#wave"), ww = W * .44, wh = phone ? 34 : 50;
     wave.width = ww * PR; wave.height = wh * PR;
-    const wx = phone ? W * .2 : W * .225, wy = phone ? H * .862 : H * .855;
+    const wx = phone ? W * .2 : W * .225, wy = phone ? H * .855 : H * .83;
     Object.assign(wave.style, { width: `${ww}px`, height: `${wh}px`, left: `${wx}px`, top: `${wy - wh / 2}px` });
     set("#bpm", { left: `${wx + ww + 8}px`, top: `${wy - 8}px` });
     $("#meter").innerHTML = Array.from({ length: 16 }, (_, i) => `<i class="${i > 12 ? "off" : ""}"></i>`).join("") + "<s></s><b></b>";
   }
   addEventListener("resize", layout);
+  const swapFrame = () => { $("#frame").src = innerWidth < 760 ? "assets/moss-frame-phone.png" : "assets/moss-frame.png"; $("#glass").style.display = innerWidth < 760 ? "none" : ""; };
+  addEventListener("resize", swapFrame); swapFrame();
 
   // Where a flat point lands on screen after the lens (inverse of bend()).
   function onScreen(x, y) {
-    const asp = W / H, norm = asp * asp + 1, tx = (x / W) * 2 - 1, ty = (y / H) * 2 - 1;
+    const asp = W / H, norm = asp * asp + 1, sAt = (r2) => 1 + K * r2 + K * .75 * r2 * r2;
+    const edge = Math.max(sAt(asp * asp / norm), sAt(1 / norm));
+    const tx = ((x / W) * 2 - 1) * edge, ty = ((y / H) * 2 - 1) * edge;
     let px = tx, py = ty;
-    for (let i = 0; i < 12; i++) { const r2 = ((px * asp) ** 2 + py * py) / norm, s = 1 + K * r2 + K * .75 * r2 * r2; px = tx / s; py = ty / s; }
+    for (let i = 0; i < 12; i++) { const r2 = ((px * asp) ** 2 + py * py) / norm, s = sAt(r2); px = tx / s; py = ty / s; }
     return [(px + 1) / 2 * W, (py + 1) / 2 * H];
   }
 
@@ -362,7 +367,7 @@
     for (const k of [-.5, 0, .5, 1]) { const a = k * Math.PI; h += `<line x1="${cx + Math.cos(a) * (R - 4)}" y1="${cy + Math.sin(a) * (R - 4)}" x2="${cx + Math.cos(a) * (R + 4)}" y2="${cy + Math.sin(a) * (R + 4)}" stroke="${G(.55)}"/>`; }
     if (!phone) {
       h += `<path d="M${cx - 4},${cy + R + 14} L${cx + 4},${cy + R + 14} L${cx},${cy + R + 5} Z" fill="${G(.75)}"/>`;
-      const rx = W * .925, top = H * .3, bot = H * .58;
+      const rx = W * .945, top = H * .29, bot = H * .585;
       h += `<line x1="${rx}" y1="${top}" x2="${rx}" y2="${bot}" stroke="${G(.5)}"/><line x1="${rx - 10}" y1="${top}" x2="${rx}" y2="${top}" stroke="${G(.6)}"/><line x1="${rx - 10}" y1="${bot}" x2="${rx}" y2="${bot}" stroke="${G(.6)}"/>`;
       for (let i = 1; i < 8; i++) { const y = top + (i / 8) * (bot - top); h += `<line x1="${rx - (i % 4 ? 5 : 9)}" y1="${y}" x2="${rx}" y2="${y}" stroke="${G(i % 4 ? .4 : .65)}"/>`; }
       const pts = [[.14, -.08, W * .74, H * .26, $("#c1")], [.18, .19, W * .755, H * .645, $("#c2")]];
@@ -400,8 +405,11 @@
   const load = (src) => new Promise((res) => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
   Promise.all([
     load(ASSETS.specimen.src).then((i) => (i ? { i, opaque: ASSETS.specimen.opaque } : load(ASSETS.specimen.fallback).then((f) => ({ i: f, opaque: true })))),
-    load(ASSETS.space.src), load(ASSETS.planet.src), document.fonts ? document.fonts.ready : null,
-  ]).then(([s, spaceImg, planetImg]) => {
+    load(ASSETS.space.src), load(ASSETS.planet.src), load(ASSETS.rocks.src), document.fonts ? document.fonts.ready : null,
+  ]).then(([s, spaceImg, planetImg, rocksImg]) => {
+    const rocksT = tex(1, 1, rocksImg), [RW, RH] = ASSETS.rocks.size;
+    const rockRects = new Float32Array(ASSETS.rocks.boxes.flatMap(([x, y, w, h]) => [x / RW, y / RH, w / RW, h / RH]));
+    const spaceSize = spaceImg ? [spaceImg.width, spaceImg.height] : [1, 1];
     const specT = tex(1, 1, s.i), planetT = planetImg ? tex(1, 1, planetImg) : tex(1, 1, new Uint8Array(4));
     if (spaceImg) spaceImgT = tex(1, 1, spaceImg);
     layout();
@@ -419,13 +427,14 @@
       const u = SCENE.u;
       gl.uniform1i(u("uSpace"), 0); gl.uniform1i(u("uSpec"), 1); gl.uniform1i(u("uPlanet"), 2);
       gl.uniform1f(u("uHasPlanet"), planetImg ? 1 : 0); gl.uniform1f(u("uSpecOpaque"), s.opaque ? 1 : 0);
-      gl.uniform1f(u("uTime"), t); gl.uniform1f(u("uSpaceIsImage"), spaceImgT ? 1 : 0); gl.uniform1f(u("uOver"), spaceImgT ? 1.04 : OVER);
+      gl.uniform1f(u("uTime"), t); gl.uniform1f(u("uSpaceIsImage"), spaceImgT ? 1 : 0); gl.uniform2f(u("uSpaceSize"), spaceSize[0], spaceSize[1]);
+      gl.uniform1i(u("uRocks"), 3); bind(3, rocksT); gl.uniform4fv(u("uRockRect[0]"), rockRects); gl.uniform1f(u("uOver"), spaceImgT ? 1.04 : OVER);
       gl.uniform2f(u("uRes"), canvas.width, canvas.height); gl.uniform2f(u("uPar"), look.x, look.y);
       gl.uniform4f(u("uSpecBox"), sx * PR, sy * PR, spec.size * breathe * PR, Math.sin(t * .11) * .05);
       gl.uniform4f(u("uPlanetBox"), planetBox.x * PR, planetBox.y * PR, planetBox.r * PR, 0);
       rocks.forEach((r, i) => {
         R4.set([(r.x + Math.sin(t * .06 + i) * r.r * .6) * PR, (r.y + Math.cos(t * .05 + i * 2) * r.r * .5) * PR, r.r * PR, r.seed], i * 4);
-        R3.set([r.z, r.rot + t * r.w, Math.max(0, r.z - .75) * 26 * PR], i * 3);
+        R3.set([r.z, r.rot + t * r.w, Math.max(0, r.z - .8) * 30 * PR], i * 3);
       });
       gl.uniform4fv(u("uRock[0]"), R4); gl.uniform3fv(u("uRockZ[0]"), R3);
       draw(SCENE);

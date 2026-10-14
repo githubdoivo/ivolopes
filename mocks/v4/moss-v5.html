@@ -24,6 +24,11 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; }
+  /* It's a display, not a document: no text/image selection, no image dragging,
+     no long-press callout on iOS, no tap highlight. */
+  html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  img, svg, canvas { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
+  ::selection { background: transparent; }
   body { color: var(--g); font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; -webkit-font-smoothing: antialiased; }
   @media (pointer: fine) { html, body, a { cursor: none; } }
   a { color: inherit; text-decoration: none; }
@@ -208,6 +213,8 @@
       `<path fill="#e6ffe0" d="${cores}"/></svg>`;
   })();
   const $ = (id) => document.getElementById(id);
+  ["selectstart", "dragstart", "dblclick"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
+  document.addEventListener("mousedown", (e) => { if (e.detail > 1) e.preventDefault(); });
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const q = new URLSearchParams(location.search);
   const frozen = q.has("t") ? +q.get("t") : null;

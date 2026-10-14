@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Ivo Lopes · QA Automation Engineer</title>
+<meta name="theme-color" content="#e9e9ec">
+<style>
+  :root {
+    --ui: Tahoma, Verdana, "Segoe UI", sans-serif; --title: "Trebuchet MS", Tahoma, sans-serif;
+    --face: #ece9d8; --edge: #aca899; --sel: #316ac5; --ink: #000; --muted: #5a5a5a; --link: #0b55c4; --pass: #1f8a1f;
+    --luna: linear-gradient(180deg, #0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font: 11px/1.4 var(--ui); color: var(--ink); overflow: hidden; -webkit-font-smoothing: antialiased;
+    background: radial-gradient(120% 90% at 50% 30%, #fbfbfc 0%, #e6e7ea 55%, #cfd0d5 100%); }
+  a { color: var(--link); }
+  button { font: inherit; color: inherit; cursor: default; }
+
+  /* ---------- The studio shot: a translucent graphite CRT ---------- */
+  .studio { position: fixed; inset: 0; display: grid; place-items: center; }
+  .rig { position: relative; width: 900px; height: 800px; transform-origin: 50% 50%; }
+  .floor { position: absolute; left: 50%; bottom: -6px; width: 620px; height: 70px; transform: translateX(-50%); border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(20, 22, 30, .35), rgba(20, 22, 30, .12) 60%, transparent); filter: blur(6px); }
+  /* A CRT foot, in the same smoked plastic. */
+  .stand { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); width: 330px; height: 70px; }
+  .neck { position: absolute; left: 50%; top: 0; width: 230px; height: 52px; transform: translateX(-50%); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, rgba(70, 76, 88, .55), rgba(110, 118, 132, .35)); }
+  .neck::after { content: ""; position: absolute; left: 30%; right: 30%; top: 10px; height: 22px; border-radius: 50%; background: rgba(20, 22, 28, .45); filter: blur(2px); }
+  .base { position: absolute; left: 0; right: 0; bottom: 0; height: 24px; border-radius: 50%;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(170, 178, 192, .55), rgba(60, 64, 74, .6) 70%);
+    box-shadow: inset 0 2px 1px rgba(255, 255, 255, .6), 0 6px 14px rgba(0, 0, 0, .2); }
+  /* The shell: clear, smoked plastic. Light passes through the rim; the dark chassis and its board show inside. */
+  .crt { position: absolute; left: 6px; right: 6px; top: 0; height: 724px; border-radius: 46px 46px 56px 56px; isolation: isolate;
+    background:
+      linear-gradient(115deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .08) 20%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, .18) 82%, rgba(255, 255, 255, 0) 100%),
+      linear-gradient(180deg, rgba(150, 158, 172, .30), rgba(84, 90, 104, .42) 60%, rgba(60, 64, 76, .5));
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+    box-shadow: inset 0 2px 1px rgba(255, 255, 255, .85), inset 0 0 0 1px rgba(255, 255, 255, .35), inset 0 0 26px rgba(255, 255, 255, .25),
+      inset 0 -16px 30px rgba(20, 22, 30, .25), 0 34px 60px rgba(20, 22, 30, .28), 0 0 0 1px rgba(40, 44, 54, .35); }
+  .crt::before { content: ""; position: absolute; inset: 20px 22px 26px; border-radius: 34px 34px 40px 40px; z-index: -1;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='844' height='678'><g fill='none' stroke='%23c9d2e0' stroke-opacity='.28' stroke-width='1.3'><path d='M20 610h110l18-18h120l12 12h60M520 620h150l16 16h120M40 70v130l14 14v220M804 90v170l-12 12v190M300 650h70l10-10h90'/></g><g fill='%23c9d2e0' fill-opacity='.22'><rect x='620' y='634' width='60' height='22' rx='3'/><rect x='150' y='632' width='42' height='28' rx='3'/><rect x='420' y='640' width='28' height='16' rx='2'/><circle cx='148' cy='592' r='4'/><circle cx='686' cy='636' r='4'/><circle cx='54' cy='214' r='4'/></g></svg>") center / 100% 100% no-repeat,
+      radial-gradient(70% 62% at 50% 46%, rgba(10, 11, 15, .82), rgba(22, 24, 30, .62) 70%, rgba(30, 33, 40, .45));
+    box-shadow: 0 0 18px rgba(10, 12, 18, .35); filter: blur(.3px); }
+  .chin { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; display: flex; align-items: center; justify-content: center; gap: 14px; color: rgba(255, 255, 255, .55); }
+  .chin .label { font: 600 12px/1 var(--title); letter-spacing: .32em; text-transform: lowercase; color: rgba(235, 240, 248, .8); text-shadow: 0 1px 0 rgba(0, 0, 0, .35); }
+  .power { position: absolute; right: 54px; bottom: 30px; width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, .5), rgba(120, 126, 140, .4) 45%, rgba(20, 22, 28, .7));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25), 0 1px 0 rgba(255, 255, 255, .2); }
+  .power::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #7cf06a; box-shadow: 0 0 8px #7cf06a, 0 0 16px rgba(124, 240, 106, .6); }
+  .bezel { position: absolute; left: 44px; right: 44px; top: 40px; height: 600px; border-radius: 18px; padding: 0; background: #050506;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .8), 0 0 0 4px rgba(255, 255, 255, .12), inset 0 0 0 1px #000; overflow: hidden; }
+
+  /* ---------- Inside the screen (800 x 600, like it was) ---------- */
+  .screen { position: absolute; inset: 0; width: 800px; height: 600px; overflow: hidden; }
+  .glass { position: absolute; inset: 0; pointer-events: none; z-index: 40;
+    background: linear-gradient(128deg, rgba(255, 255, 255, .13) 0%, rgba(255, 255, 255, 0) 30%), radial-gradient(130% 110% at 50% 50%, transparent 66%, rgba(0, 0, 0, .35) 100%); }
+  .desktop { position: absolute; inset: 0;
+    background:
+      radial-gradient(40% 14% at 26% 22%, rgba(255, 255, 255, .85), transparent 70%),
+      radial-gradient(30% 10% at 64% 14%, rgba(255, 255, 255, .7), transparent 70%),
+      radial-gradient(22% 7% at 82% 30%, rgba(255, 255, 255, .55), transparent 70%),
+      radial-gradient(160% 60% at 40% 118%, #4f9a27 0 42%, #6db03a 50%, transparent 51%),
+      radial-gradient(120% 50% at 100% 120%, #3e8a1d 0 44%, transparent 45%),
+      linear-gradient(180deg, #2a68d4 0%, #4e8fe8 40%, #9cc6f5 72%, #cfe3f8 100%); }
+  .icons { position: absolute; left: 6px; top: 8px; display: grid; gap: 14px; width: 70px; }
+  .icon { display: grid; justify-items: center; gap: 3px; text-align: center; color: #fff; text-decoration: none; font-size: 11px; text-shadow: 1px 1px 1px rgba(0, 0, 0, .85); padding: 3px; }
+  .icon:focus-visible span, .icon:hover span { background: var(--sel); outline: 1px dotted #fff; }
+  .icon svg { width: 32px; height: 32px; }
+
+  .window { position: absolute; left: 80px; top: 8px; right: 8px; bottom: 38px; display: flex; flex-direction: column; background: var(--face);
+    border: 3px solid #0831d9; border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 2px 3px 10px rgba(0, 0, 0, .35); overflow: hidden; }
+  .titlebar { flex: none; height: 28px; display: flex; align-items: center; gap: 5px; padding: 0 4px 0 6px; background: var(--luna); color: #fff; border-radius: 7px 7px 0 0;
+    font: 700 13px var(--title); text-shadow: 1px 1px #0f1089; }
+  .titlebar .t { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .titlebar svg { width: 16px; height: 16px; flex: none; }
+  .tb { width: 21px; height: 21px; border: 1px solid #fff; border-radius: 3px; display: grid; place-items: center; flex: none;
+    background: radial-gradient(circle at 90% 90%, #0054e9 0%, #2263d5 55%, #4479e4 70%, #a3bbec 90%, #fff 100%); }
+  .tb.x { background: radial-gradient(circle at 90% 90%, #cc4600 0%, #dc6527 55%, #cd7546 70%, #ffccb2 90%, #fff 100%); }
+  .tb svg { width: 9px; height: 9px; }
+  .menubar { flex: none; display: flex; padding: 1px 2px; border-bottom: 1px solid #fff; box-shadow: 0 1px 0 var(--edge); }
+  .menubar span { padding: 2px 7px; }
+  .menubar span:hover { background: var(--sel); color: #fff; }
+  .toolbar { flex: none; display: flex; align-items: center; gap: 2px; padding: 3px 4px; border-bottom: 1px solid var(--edge); }
+  .tool { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 7px; border: 1px solid transparent; border-radius: 3px; background: none; text-decoration: none; color: var(--ink); }
+  .tool:hover { border-color: #cecece #898989 #898989 #cecece; background: linear-gradient(180deg, #fff, #ecebe6); }
+  .tool svg { width: 18px; height: 18px; }
+  .sep { width: 1px; height: 20px; background: var(--edge); box-shadow: 1px 0 #fff; margin: 0 4px; }
+  .grow { flex: 1; }
+  select.xp { font: inherit; height: 21px; border: 1px solid #7f9db9; background: #fff; padding: 0 2px; }
+
+  .body { flex: 1; min-height: 0; display: grid; grid-template-columns: 96px 1fr; }
+  .modules { background: linear-gradient(180deg, #7aa1e6, #5a7edc 60%, #4d6fcf); padding: 8px 6px; display: grid; align-content: start; gap: 4px; border-right: 1px solid #3c5bb7; }
+  .mod { display: grid; justify-items: center; gap: 3px; padding: 7px 2px 6px; border-radius: 4px; border: 1px solid transparent; background: none; color: #fff; font-size: 11px; text-shadow: 0 1px 1px rgba(0, 0, 0, .4); }
+  .mod svg { width: 30px; height: 30px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); }
+  .mod:hover { border-color: rgba(255, 255, 255, .5); background: rgba(255, 255, 255, .12); }
+  .mod[aria-current="page"] { background: linear-gradient(180deg, #fff, #e3ebfb); color: #0b2f8a; text-shadow: none; border-color: #fff; }
+  .content { min-width: 0; overflow: auto; background: #fff; border-left: 1px solid #fff; }
+  .pane-h { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: linear-gradient(180deg, #fff, #ebeadb); border-bottom: 1px solid #d6d2c2; font: 700 13px var(--title); color: #0b2f8a; }
+  .pane-h small { font: 11px var(--ui); color: var(--muted); }
+  .pad { padding: 10px 12px; }
+
+  .who { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; padding: 12px; border-bottom: 1px solid #ece9d8; }
+  .pic { width: 64px; height: 64px; border-radius: 6px; border: 2px solid #fff; box-shadow: 0 0 0 1px #8aa3d6, 1px 2px 4px rgba(0, 0, 0, .3); display: grid; place-items: center;
+    background: radial-gradient(circle at 30% 25%, #fff 0, #ffd9a0 18%, #f39b2a 55%, #c1560a 100%); font: 700 22px var(--title); color: #fff; text-shadow: 1px 1px 1px rgba(0, 0, 0, .35); }
+  .who h1 { font: 700 22px/1.05 var(--title); color: #0b2f8a; }
+  .who .role { font: 700 12px var(--title); margin-top: 2px; }
+  .who .tag { color: var(--muted); font-style: italic; margin-top: 2px; }
+
+  fieldset { border: 1px solid #d0d0bf; border-radius: 4px; padding: 6px 10px 10px; margin: 10px 12px; }
+  legend { color: #0046d5; padding: 0 4px; }
+  .runrow { display: flex; gap: 8px; align-items: center; margin: 4px 0 8px; }
+  .btn { min-width: 75px; height: 23px; padding: 0 10px; border: 1px solid #003c74; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; color: var(--ink);
+    background: linear-gradient(180deg, #fff 0%, #ecebe6 86%, #d6d0c5 100%); box-shadow: inset -1px -1px 0 rgba(0, 0, 0, .06); }
+  .btn:hover { box-shadow: inset 0 0 0 2px #f8b636, inset 0 0 0 3px #fbe3a0; }
+  .btn:active { background: linear-gradient(180deg, #e5e4de, #f2f2f1); }
+  .btn.default { box-shadow: inset 0 0 0 1px #98b8ea, inset 0 0 0 2px #cddcf7; }
+  .btn svg { width: 14px; height: 14px; }
+  .progress { flex: 1; height: 16px; border: 1px solid #686868; border-radius: 3px; background: #fff; padding: 1px 2px; box-shadow: inset 0 0 1px #9f9f9f; }
+  .progress i { display: block; height: 100%; width: 0; transition: width .3s steps(8);
+    background: repeating-linear-gradient(90deg, transparent 0 1px, #fff 1px 3px, transparent 3px 9px), linear-gradient(180deg, #acedad 0%, #7be47d 14%, #4cda50 28%, #2ed330 42%, #42d845 57%, #76e275 71%, #8fe791 85%, #fff 100%); }
+
+  table.list { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #7f9db9; }
+  .list th { text-align: left; font-weight: 400; padding: 3px 6px; background: linear-gradient(180deg, #fff, #ebeadb 90%, #d6d2c2); border-right: 1px solid #d6d2c2; border-bottom: 2px solid #d6d2c2; white-space: nowrap; }
+  .list td { padding: 3px 6px; vertical-align: top; border-bottom: 1px solid #f1efe2; }
+  .list tr.sel td { background: var(--sel); color: #fff; }
+  .list tr.sel td .st { color: #fff; }
+  .list tbody tr { cursor: default; }
+  .list tbody tr:hover:not(.sel) td { background: #f3f6fd; }
+  .st { color: var(--pass); white-space: nowrap; display: inline-flex; gap: 4px; align-items: center; font-weight: 700; }
+  .st.pending { color: #8a8a8a; font-weight: 400; }
+  .st svg { width: 12px; height: 12px; }
+  .list td.num { color: var(--muted); width: 26px; text-align: right; }
+  .list b { font-weight: 700; }
+
+  .tabs { display: flex; gap: 0; padding: 0 12px; margin-top: 10px; position: relative; z-index: 1; }
+  .tabs button { padding: 3px 10px 4px; border: 1px solid #919b9c; border-bottom: 0; border-radius: 3px 3px 0 0; margin-right: -1px; background: linear-gradient(180deg, #fff, #ecebe5 70%, #d8d2bd); }
+  .tabs button[aria-selected="true"] { background: #fcfcfe; padding-bottom: 6px; margin-bottom: -2px; box-shadow: inset 0 2px 0 #e68b2c, inset 0 3px 0 #ffc73c; }
+  .tabpanel { margin: 0 12px 12px; border: 1px solid #919b9c; background: #fcfcfe; padding: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chips span { padding: 1px 6px; border: 1px solid #b9c9e6; background: linear-gradient(180deg, #fff, #eaf0fb); border-radius: 2px; }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .metric { border: 1px solid #d6d2c2; background: linear-gradient(180deg, #fff, #f4f3ee); padding: 6px 8px; border-radius: 3px; }
+  .metric b { display: block; font: 700 17px var(--title); color: #0b2f8a; }
+  .metric span { color: var(--muted); }
+  .split { display: grid; grid-template-columns: 170px 1fr; gap: 8px; padding: 10px 12px; }
+  .tree { border: 1px solid #7f9db9; background: #fff; padding: 4px; list-style: none; max-height: 380px; overflow: auto; }
+  .tree li button { display: flex; align-items: center; gap: 4px; width: 100%; text-align: left; border: 0; background: none; padding: 2px 3px; }
+  .tree li button[aria-pressed="true"] { background: var(--sel); color: #fff; }
+  .tree svg { width: 16px; height: 16px; flex: none; }
+  .field { display: grid; grid-template-columns: 90px 1fr; gap: 6px 10px; align-items: center; }
+  .text { height: 21px; border: 1px solid #7f9db9; background: #fff; padding: 2px 4px; display: flex; align-items: center; }
+  .statusbar { flex: none; display: flex; gap: 2px; padding: 2px; border-top: 1px solid var(--edge); }
+  .statusbar span { padding: 1px 6px; border: 1px solid; border-color: var(--edge) #fff #fff var(--edge); }
+  .statusbar span:first-child { flex: 1; }
+
+  .taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 30px; display: flex; align-items: center; z-index: 10;
+    background: linear-gradient(180deg, #1f2f86 0, #3165c4 3%, #3682e5 6%, #4490e6 10%, #3883e5 12%, #2b71e0 15%, #2663da 18%, #235bd6 20%, #2258d5 23%, #2157d6 38%, #245ddb 54%, #2562df 86%, #245fdc 89%, #2158d4 92%, #1d4ec0 95%, #1941a5 98%); }
+  .start { height: 100%; display: flex; align-items: center; gap: 5px; padding: 0 18px 0 8px; border: 0; border-radius: 0 10px 10px 0; color: #fff; font: italic 700 17px var(--title); text-shadow: 1px 1px 1px rgba(0, 0, 0, .55);
+    background: radial-gradient(circle at 30% 20%, #6fcf5a, #3a9b25 45%, #2f8a1b 70%, #287a15); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset -2px 0 3px rgba(0, 0, 0, .3), 2px 0 4px rgba(0, 0, 0, .3); }
+  .start i { width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 11px; background: radial-gradient(circle at 35% 30%, #fff, #d8f0ff 40%, #5aa8f0); color: #0b4fb3; text-shadow: none; box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
+  .task { margin-left: 8px; height: 22px; max-width: 170px; flex: 1; display: flex; align-items: center; gap: 5px; padding: 0 8px; color: #fff; border-radius: 2px; white-space: nowrap; overflow: hidden;
+    background: #1e52b7; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, .4), inset -1px -1px 0 rgba(255, 255, 255, .15); }
+  .task svg { width: 14px; height: 14px; flex: none; }
+  .tray { margin-left: auto; height: 100%; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #fff; border-left: 1px solid #092e8c;
+    background: linear-gradient(180deg, #0c59b9 1%, #139ee9 6%, #18b5f2 10%, #139beb 14%, #1290e8 19%, #0d8dea 63%, #0d9ff1 81%, #0f9eed 88%, #119be9 91%, #1392e2 94%, #137ed7 97%, #095bc9); }
+  .tray svg { width: 15px; height: 15px; }
+
+  /* ---------- Phones: a Pocket PC ---------- */
+  .ppc { display: none; }
+  @media (max-width: 760px) {
+    body { background: #2b2d33; }
+    .studio { display: none; }
+    .ppc { display: flex; flex-direction: column; position: fixed; inset: 0; background: #fff;
+      border: 7px solid rgba(70, 74, 84, .8); border-radius: 30px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+      margin: max(0px, env(safe-area-inset-top)) 0 0; }
+    .ppc-top { flex: none; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px; color: #fff; background: var(--luna); font: 700 15px var(--title); text-shadow: 1px 1px #0f1089; }
+    .ppc-top .t { flex: 1; }
+    .ppc-top i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 13px; background: radial-gradient(circle at 35% 30%, #fff, #d8f0ff 40%, #5aa8f0); color: #0b4fb3; text-shadow: none; }
+    .ppc-top .ok { font: 700 12px var(--ui); border: 1px solid rgba(255, 255, 255, .8); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
+    .ppc .content { flex: 1; min-height: 0; overflow: auto; font-size: 13px; -webkit-overflow-scrolling: touch; }
+    .ppc-bar { flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: linear-gradient(180deg, #f6f5f0, #dcd8cb); border-top: 1px solid var(--edge); padding-bottom: max(4px, env(safe-area-inset-bottom)); }
+    .ppc-bar .mod { color: #1c3c8c; text-shadow: none; font-size: 10.5px; padding: 6px 0 4px; border-radius: 0; }
+    .ppc-bar .mod svg { width: 24px; height: 24px; }
+    .ppc-bar .mod[aria-current="page"] { background: linear-gradient(180deg, #316ac5, #2556a8); color: #fff; border-color: transparent; }
+    .ppc .who { grid-template-columns: 52px 1fr; padding: 12px 12px 10px; }
+    .ppc .pic { width: 52px; height: 52px; font-size: 18px; }
+    .ppc .who h1 { font-size: 21px; }
+    .ppc fieldset { margin: 10px; }
+    .ppc .metrics { grid-template-columns: repeat(2, 1fr); }
+    .ppc .split { grid-template-columns: 1fr; }
+    .ppc .list th:nth-child(4), .ppc .list td:nth-child(4) { display: none; }
+    .ppc .tabs { padding: 0 10px; } .ppc .tabpanel { margin: 0 10px 10px; }
+    .ppc .field { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="studio" aria-hidden="false">
+  <div class="rig" id="rig">
+    <div class="floor"></div>
+    <div class="stand"><div class="neck"></div><div class="base"></div></div>
+    <div class="crt">
+      <div class="bezel">
+        <div class="screen" id="screen">
+          <div class="desktop">
+            <nav class="icons" id="icons" aria-label="Desktop"></nav>
+            <section class="window" aria-label="QualityLab">
+              <div class="titlebar">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3" fill="#fff"/><path d="M4 8.5l2.5 2.5L12 5" stroke="#1f8a1f" stroke-width="2.2" fill="none"/></svg>
+                <span class="t">QualityLab — Ivo Lopes.qlp</span>
+                <span class="tb" aria-hidden="true"><svg viewBox="0 0 9 9"><path d="M1 7.5h5" stroke="#fff" stroke-width="2"/></svg></span>
+                <span class="tb" aria-hidden="true"><svg viewBox="0 0 9 9"><rect x="1" y="1" width="7" height="7" stroke="#fff" stroke-width="1.5" fill="none"/><path d="M1 2h7" stroke="#fff" stroke-width="2"/></svg></span>
+                <span class="tb x" aria-hidden="true"><svg viewBox="0 0 9 9"><path d="M1 1l7 7M8 1L1 8" stroke="#fff" stroke-width="1.8"/></svg></span>
+              </div>
+              <div class="menubar" aria-hidden="true"><span>File</span><span>Edit</span><span>View</span><span>Tests</span><span>Run</span><span>Tools</span><span>Help</span></div>
+              <div class="toolbar" id="toolbar"></div>
+              <div class="body">
+                <nav class="modules" id="modules" aria-label="Modules"></nav>
+                <main class="content" id="content"></main>
+              </div>
+              <div class="statusbar"><span id="status">Ready</span><span id="status-r">0 / 6 passed</span><span>Porto</span></div>
+            </section>
+            <div class="taskbar">
+              <button class="start" type="button"><i>✓</i>start</button>
+              <div class="task"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="3" fill="#fff"/><path d="M4 8.5l2.5 2.5L12 5" stroke="#1f8a1f" stroke-width="2.2" fill="none"/></svg>QualityLab — Ivo Lopes</div>
+              <div class="tray"><svg viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2z" fill="#fff"/></svg><svg viewBox="0 0 16 16"><rect x="1" y="9" width="3" height="5" fill="#fff"/><rect x="6" y="6" width="3" height="8" fill="#fff"/><rect x="11" y="3" width="3" height="11" fill="#fff"/></svg><span id="clock"></span></div>
+            </div>
+          </div>
+          <div class="glass"></div>
+        </div>
+      </div>
+      <div class="chin"><span class="label">ivo · qa</span></div>
+      <span class="power" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
+
+<div class="ppc" id="ppc">
+  <div class="ppc-top"><i>✓</i><span class="t">QualityLab</span><span id="ppc-clock"></span><span class="ok">ok</span></div>
+  <main class="content" id="ppc-content"></main>
+  <nav class="ppc-bar" id="ppc-bar" aria-label="Modules"></nav>
+</div>
+
+<script src="https://qa.ivolopes.com/data.js"></script>
+<script src="https://qa.ivolopes.com/data.pt.js"></script>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search);
+  const cv = q.get("lang") === "pt" && window.CV_PT ? window.CV_PT : window.CV;
+  const ui = cv.ui, pt = cv.lang === "pt";
+  document.documentElement.lang = cv.lang;
+  const $ = (s, el = document) => el.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PDF = `https://qa.ivolopes.com/${ui.pdfFile}`, P = cv.projects[0];
+  const phone = () => matchMedia("(max-width: 760px)").matches;
+
+  const I = {
+    overview: '<svg viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="20" rx="2" fill="#fff" stroke="#1d3d8f"/><rect x="6" y="15" width="4" height="7" fill="#46b03c"/><rect x="12" y="11" width="4" height="11" fill="#f3a530"/><rect x="18" y="8" width="4" height="14" fill="#2f7be0"/><rect x="24" y="13" width="3" height="9" fill="#d9472b"/></svg>',
+    plan: '<svg viewBox="0 0 32 32"><rect x="4" y="3" width="22" height="26" rx="2" fill="#fff" stroke="#1d3d8f"/><path d="M9 10l2 2 4-4M9 17l2 2 4-4M9 24l2 2 4-4" stroke="#1f8a1f" stroke-width="2" fill="none"/><path d="M17 11h6M17 18h6M17 25h6" stroke="#7a8db8" stroke-width="2"/></svg>',
+    lab: '<svg viewBox="0 0 32 32"><path d="M12 3h8M13 3v9L5 27a2 2 0 0 0 2 3h18a2 2 0 0 0 2-3l-8-15V3" fill="#e9f3ff" stroke="#1d3d8f" stroke-width="1.4"/><path d="M8 22h16l3 5a1.5 1.5 0 0 1-1.5 2h-19A1.5 1.5 0 0 1 5 27z" fill="#46b03c"/><circle cx="14" cy="24" r="1.5" fill="#fff"/><circle cx="19" cy="26" r="1" fill="#fff"/></svg>',
+    lib: '<svg viewBox="0 0 32 32"><rect x="4" y="6" width="6" height="22" fill="#d9472b" stroke="#1d3d8f"/><rect x="11" y="4" width="6" height="24" fill="#2f7be0" stroke="#1d3d8f"/><rect x="18" y="8" width="5" height="20" fill="#46b03c" stroke="#1d3d8f"/><path d="M24 9l4 1-4 18-4-1z" fill="#f3a530" stroke="#1d3d8f"/></svg>',
+    contact: '<svg viewBox="0 0 32 32"><rect x="3" y="7" width="26" height="18" rx="2" fill="#fff" stroke="#1d3d8f"/><path d="M4 8l12 9 12-9" stroke="#1d3d8f" fill="none" stroke-width="1.4"/><circle cx="25" cy="24" r="5" fill="#f3a530" stroke="#fff"/><path d="M25 21v4h3" stroke="#fff" fill="none" stroke-width="1.5"/></svg>',
+    pass: '<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.5" fill="#1f8a1f"/><path d="M3.3 6.2l1.8 1.8 3.6-3.8" stroke="#fff" stroke-width="1.6" fill="none"/></svg>',
+    pending: '<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="none" stroke="#9a9a9a"/></svg>',
+    folder: '<svg viewBox="0 0 16 16"><path d="M1 4h5l1.5 1.5H15V13H1z" fill="#f6d36a" stroke="#c19a2b" stroke-width=".8"/></svg>',
+    file: '<svg viewBox="0 0 16 16"><path d="M3 1h7l3 3v11H3z" fill="#fff" stroke="#7a8db8" stroke-width=".8"/></svg>',
+    pdf: '<svg viewBox="0 0 32 32"><path d="M6 2h14l6 6v22H6z" fill="#fff" stroke="#555"/><rect x="9" y="17" width="14" height="8" rx="1" fill="#d32f2f"/><text x="16" y="23.4" font-size="6" font-family="Tahoma" font-weight="700" fill="#fff" text-anchor="middle">PDF</text></svg>',
+    bin: '<svg viewBox="0 0 32 32"><path d="M8 9h16l-2 20H10z" fill="#e8eef8" stroke="#555"/><path d="M6 9h20M13 5h6" stroke="#555" stroke-width="2"/></svg>',
+    app: '<svg viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="6" fill="#fff" stroke="#1d3d8f"/><path d="M9 16.5l4.5 4.5L23 11" stroke="#1f8a1f" stroke-width="3.2" fill="none"/></svg>',
+    play: '<svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#2c9c2c"/><path d="M7 5.5l5.5 3.5L7 12.5z" fill="#fff"/></svg>',
+    dl: '<svg viewBox="0 0 18 18"><path d="M4 2h7l3 3v11H4z" fill="#fff" stroke="#555"/><path d="M9 7v6M6.5 10.5L9 13l2.5-2.5" stroke="#2f7be0" stroke-width="1.6" fill="none"/></svg>',
+    mail: '<svg viewBox="0 0 18 18"><rect x="1.5" y="4" width="15" height="10" rx="1" fill="#fff" stroke="#555"/><path d="M2 4.5l7 5 7-5" stroke="#555" fill="none"/></svg>',
+  };
+  const st = (ok) => ok ? `<span class="st">${I.pass}${pt ? "Passou" : "Passed"}</span>` : `<span class="st pending">${I.pending}${pt ? "Por correr" : "No run"}</span>`;
+  const MODS = [
+    ["overview", pt ? "Resumo" : "Overview"],
+    ["plan", pt ? "Plano" : "Test Plan"],
+    ["lab", pt ? "Lab" : "Test Lab"],
+    ["lib", pt ? "Ferramentas" : "Library"],
+    ["contact", pt ? "Contacto" : "Contact"],
+  ];
+  let mod = "overview", job = 0, tab = "steps", group = 0, ran = false;
+
+  /* ---------- Modules ---------- */
+  function view() {
+    if (mod === "overview") return `
+      <div class="who"><div class="pic" aria-hidden="true">IL</div><div><h1>${esc(cv.name)}</h1><p class="role">${esc(cv.title)}</p><p class="tag">${esc(cv.tagline)}</p></div></div>
+      <fieldset><legend>${pt ? "Execução: suite de regressão do CV" : "Execution: CV regression suite"}</legend>
+        <div class="runrow"><button class="btn default" data-run type="button">${I.play.replace('viewBox="0 0 18 18"', 'viewBox="0 0 18 18" width="14" height="14"')}${pt ? "Executar" : "Run all"}</button><div class="progress"><i id="bar"></i></div><span id="count">0/${cv.checks.length}</span></div>
+        <table class="list"><thead><tr><th>Test</th><th>${pt ? "Descrição" : "Description"}</th><th>Status</th></tr></thead>
+        <tbody>${cv.checks.map(([k, v], i) => `<tr data-check="${i}"><td><b>${esc(k)}</b></td><td>${esc(v)}</td><td class="s">${st(ran)}</td></tr>`).join("")}</tbody></table>
+      </fieldset>
+      <fieldset><legend>${esc(ui.sSummary)}</legend><p>${rich(cv.summary)}</p></fieldset>
+      <fieldset><legend>${pt ? "Resultados" : "Results"}</legend><div class="metrics">${cv.metrics.map((m) => `<div class="metric"><b>${esc(m.value)}</b><span>${esc(m.label)}</span></div>`).join("")}</div></fieldset>`;
+    if (mod === "plan") {
+      const j = cv.experience[job];
+      const panel = tab === "steps"
+        ? `<table class="list"><thead><tr><th>#</th><th>${pt ? "Passo" : "Step"}</th><th>Status</th></tr></thead><tbody>${j.bullets.map((b, i) => `<tr><td class="num">${i + 1}</td><td>${rich(b)}</td><td>${st(true)}</td></tr>`).join("")}</tbody></table>`
+        : tab === "details"
+          ? `<div class="field"><span>${pt ? "Empresa" : "Company"}</span><div class="text">${esc(j.company)}</div><span>${pt ? "Função" : "Role"}</span><div class="text">${esc(j.role)}</div><span>${pt ? "Período" : "Period"}</span><div class="text">${esc(j.start)} → ${esc(j.end)}</div><span>${pt ? "Local" : "Location"}</span><div class="text">${esc(j.location)}</div></div><p style="margin-top:8px">${esc(j.blurb)}</p>`
+          : `<div class="chips">${j.stack.map((s) => `<span>${esc(s)}</span>`).join("")}</div>`;
+      return `<div class="pane-h">${pt ? "Plano de testes" : "Test Plan"}<small>${pt ? "experiência" : "experience"}</small></div>
+        <div class="pad"><table class="list"><thead><tr><th>${pt ? "Empresa" : "Company"}</th><th>${pt ? "Função" : "Role"}</th><th>${pt ? "Período" : "Period"}</th><th>${pt ? "Estado" : "State"}</th></tr></thead>
+          <tbody>${cv.experience.map((e, i) => `<tr class="${i === job ? "sel" : ""}" data-job="${i}"><td><b>${esc(e.company)}</b></td><td>${esc(e.role)}</td><td>${esc(e.start)} → ${esc(e.end)}</td><td>${e.end === ui.present ? (pt ? "Ativo" : "Active") : (pt ? "Fechado" : "Closed")}</td></tr>`).join("")}</tbody></table></div>
+        <div class="tabs" role="tablist">${[["steps", pt ? "Passos" : "Design Steps"], ["details", pt ? "Detalhes" : "Details"], ["tools", pt ? "Ferramentas" : "Tools"]].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${tab === k}">${l}</button>`).join("")}</div>
+        <div class="tabpanel">${panel}</div>`;
+    }
+    if (mod === "lab") return `<div class="pane-h">${esc(P.name)}<small>${esc(P.kind)}</small></div>
+      <div class="pad"><p>${esc(P.blurb)}</p>
+        <p style="margin-top:8px"><a class="btn default" href="${P.demo}">${esc(ui.tryDemo)}</a> <a class="btn" href="${P.href}">${esc(ui.code)}</a> <a class="btn" href="${P.tests}">E2E report</a> <a class="btn" href="https://qa.ivolopes.com/${P.story}">${pt ? "Caso: CI instável" : "Flaky CI write-up"}</a></p></div>
+      <div class="pad" style="padding-top:0"><table class="list"><thead><tr><th>#</th><th>Run</th><th>Status</th></tr></thead><tbody>${P.points.map((b, i) => `<tr><td class="num">${i + 1}</td><td>${rich(b)}</td><td>${st(true)}</td></tr>`).join("")}</tbody></table></div>
+      <div class="pad" style="padding-top:0"><div class="chips">${P.stack.map((s) => `<span>${esc(s)}</span>`).join("")}</div></div>`;
+    if (mod === "lib") {
+      const gsel = cv.skills[group];
+      return `<div class="pane-h">${pt ? "Biblioteca" : "Library"}<small>${pt ? "ferramentas e práticas" : "toolkit"}</small></div>
+        <div class="split"><ul class="tree">${cv.skills.map((s, i) => `<li><button type="button" data-group="${i}" aria-pressed="${i === group}">${I.folder}${esc(s.group)}</button></li>`).join("")}</ul>
+        <table class="list"><thead><tr><th>${pt ? "Nome" : "Name"}</th><th>${pt ? "Tipo" : "Type"}</th></tr></thead><tbody>${gsel.items.map((s) => `<tr><td>${I.file.replace("<svg", '<svg style="width:14px;height:14px;vertical-align:-3px;margin-right:4px"')}${esc(s)}</td><td style="color:#5a5a5a">${esc(gsel.group)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    return `<div class="pane-h">${esc(ui.contact)}<small>${pt ? "enviar relatório" : "send a report"}</small></div>
+      <fieldset><legend>${pt ? "Para" : "To"}</legend><div class="field"><span>E-mail</span><div class="text">${esc(cv.email)}</div>${cv.links.map((l) => `<span>${esc(l.label)}</span><div class="text"><a href="${l.href}">${esc(l.text)}</a></div>`).join("")}</div>
+        <p style="margin-top:10px"><a class="btn default" href="mailto:${cv.email}">${I.mail.replace('viewBox="0 0 18 18"', 'viewBox="0 0 18 18" width="14" height="14"')}${pt ? "Enviar e-mail…" : "E-mail…"}</a> <button class="btn" type="button" data-copy>${esc(ui.copyEmail)}</button></p></fieldset>
+      <fieldset><legend>${pt ? "Anexos" : "Attachments"}</legend><p>${esc(ui.contactLead)}</p>
+        <p style="margin-top:8px"><a class="btn" href="https://qa.ivolopes.com/ivo-lopes-cv.pdf" download="Ivo Lopes CV.pdf">CV (EN).pdf</a> <a class="btn" href="https://qa.ivolopes.com/ivo-lopes-cv-pt.pdf" download="Ivo Lopes CV (PT).pdf">CV (PT).pdf</a></p></fieldset>`;
+  }
+
+  function render() {
+    const host = phone() ? $("#ppc-content") : $("#content");
+    host.innerHTML = view();
+    host.scrollTop = 0;
+    document.querySelectorAll("[data-mod]").forEach((b) => b.setAttribute("aria-current", b.dataset.mod === mod ? "page" : "false"));
+    host.querySelector("[data-run]")?.addEventListener("click", run);
+    host.querySelectorAll("[data-job]").forEach((r) => r.addEventListener("click", () => { job = +r.dataset.job; render(); }));
+    host.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.tab; render(); }));
+    host.querySelectorAll("[data-group]").forEach((b) => b.addEventListener("click", () => { group = +b.dataset.group; render(); }));
+    host.querySelector("[data-copy]")?.addEventListener("click", async (e) => { try { await navigator.clipboard.writeText(cv.email); e.target.textContent = ui.copied; } catch (_) {} });
+  }
+  const modBtn = ([k, l]) => `<button class="mod" type="button" data-mod="${k}">${I[k]}<span>${esc(l)}</span></button>`;
+  $("#modules").innerHTML = MODS.map(modBtn).join("");
+  $("#ppc-bar").innerHTML = MODS.map(modBtn).join("");
+  document.querySelectorAll("[data-mod]").forEach((b) => b.addEventListener("click", () => { mod = b.dataset.mod; render(); }));
+
+  $("#toolbar").innerHTML = `
+    <button class="tool" type="button" data-run2>${I.play}${pt ? "Executar tudo" : "Run all"}</button>
+    <a class="tool" href="${PDF}" download="${esc(ui.pdfName)}">${I.dl}${pt ? "Descarregar CV" : "Download CV"}</a>
+    <a class="tool" href="mailto:${cv.email}">${I.mail}E-mail</a>
+    <span class="sep"></span><span class="grow"></span>
+    <label>${pt ? "Idioma" : "Language"} <select class="xp" id="lang"><option value="en">English</option><option value="pt">Português</option></select></label>`;
+  $("#lang").value = cv.lang;
+  $("#lang").addEventListener("change", (e) => { location.search = `?lang=${e.target.value}`; });
+  $("[data-run2]").addEventListener("click", () => { if (mod !== "overview") { mod = "overview"; render(); } run(); });
+  $("#icons").innerHTML = `<a class="icon" href="${PDF}" download="${esc(ui.pdfName)}">${I.pdf}<span>${pt ? "CV.pdf" : "My CV.pdf"}</span></a>
+    <a class="icon" href="${P.demo}">${I.app}<span>appdoivo</span></a>
+    <span class="icon">${I.bin}<span>${pt ? "Reciclagem" : "Recycle Bin"}</span></span>`;
+
+  /* ---------- The run ---------- */
+  let timers = [];
+  function run() {
+    timers.forEach(clearTimeout); timers = [];
+    ran = false;
+    const host = phone() ? $("#ppc-content") : $("#content");
+    const rows = [...host.querySelectorAll("[data-check]")];
+    rows.forEach((r) => { r.querySelector(".s").innerHTML = st(false); r.classList.remove("sel"); });
+    $("#status").textContent = pt ? "A executar…" : "Running…";
+    rows.forEach((r, i) => timers.push(setTimeout(() => {
+      rows.forEach((x) => x.classList.remove("sel"));
+      r.classList.add("sel");
+      r.querySelector(".s").innerHTML = st(true);
+      const bar = host.querySelector("#bar"); if (bar) bar.style.width = `${((i + 1) / rows.length) * 100}%`;
+      const c = host.querySelector("#count"); if (c) c.textContent = `${i + 1}/${rows.length}`;
+      $("#status-r").textContent = `${i + 1} / ${rows.length} ${pt ? "passaram" : "passed"}`;
+      if (i === rows.length - 1) { ran = true; $("#status").textContent = ui.footerChecks; timers.push(setTimeout(() => r.classList.remove("sel"), 600)); }
+    }, still ? 0 : 500 + i * 380)));
+  }
+
+  /* ---------- Fit the monitor to the window ---------- */
+  function fit() {
+    const s = Math.min((innerWidth * 0.94) / 900, (innerHeight * 0.94) / 800, 1.45);
+    $("#rig").style.transform = `scale(${s})`;
+  }
+  const tick = () => { const t = new Date().toLocaleTimeString(pt ? "pt-PT" : "en-US", { hour: "numeric", minute: "2-digit" }); $("#clock").textContent = t; $("#ppc-clock").textContent = t; };
+  tick(); setInterval(tick, 15000);
+  let wasPhone = phone();
+  addEventListener("resize", () => { fit(); if (phone() !== wasPhone) { wasPhone = phone(); render(); } });
+  fit();
+  if (q.has("mod")) mod = q.get("mod");
+  render();
+  if (mod === "overview") setTimeout(run, still ? 0 : 700);
+})();
+</script>
+</body>
+</html>

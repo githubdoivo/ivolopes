@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MOSS · signal acquired</title>
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --g: #a8f0a0; --g2: rgba(168, 240, 160, .62); --mono: "Share Tech Mono", ui-monospace, monospace; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { color: var(--g); font: 13px/1.35 var(--mono); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 0 8px rgba(140, 255, 140, .45); opacity: 0; transition: opacity 1.6s .3s; }
+  .hud.on { opacity: 1; }
+  .hud a { pointer-events: auto; }
+  .blk { position: absolute; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+  .blk.r { text-align: right; }
+  .data { font-size: 12.5px; line-height: 1.45; }
+  .data span { display: inline-block; min-width: 3.4em; color: var(--g2); }
+  .plus { position: absolute; width: 14px; height: 14px; }
+  .plus::before, .plus::after { content: ""; position: absolute; background: var(--g2); }
+  .plus::before { left: 6.5px; top: 0; width: 1px; height: 14px; } .plus::after { top: 6.5px; left: 0; height: 1px; width: 14px; }
+  .wordmark { font-size: clamp(44px, 4.6vw, 70px); letter-spacing: .62em; line-height: 1; text-shadow: 0 0 14px rgba(140, 255, 140, .6), 0 0 40px rgba(120, 255, 140, .25); }
+  .role { margin-top: 18px; font-size: clamp(13px, 1.25vw, 18px); letter-spacing: .62em; }
+  .tx { margin-top: 40px; font-size: clamp(13px, 1.15vw, 16px); letter-spacing: .26em; }
+  .meter { display: flex; gap: 2px; margin-top: 10px; align-items: center; }
+  .meter i { width: 4px; height: 7px; background: var(--g); }
+  .meter i.off { opacity: .18; }
+  .meter b { width: 1px; height: 9px; background: var(--g2); margin-left: 70px; }
+  .mail { display: inline-flex; gap: 10px; align-items: center; margin-top: 34px; font-size: 13px; letter-spacing: .14em; }
+  .mail:hover { color: #fff; }
+  .mail::before { content: ""; border-left: 8px solid var(--g2); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .callout { font-size: 12px; line-height: 1.5; letter-spacing: .14em; }
+  .bracket { padding: 2px 10px; border-left: 1px solid var(--g2); font-size: 11px; line-height: 1.4; color: var(--g2); }
+  .blk.r .bracket { border-left: 0; border-right: 1px solid var(--g2); }
+  #lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  #wave { position: absolute; display: block; }
+  .bpm { font-size: 12px; letter-spacing: .14em; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 760px) {
+    .wordmark { font-size: 40px; letter-spacing: .5em; text-indent: .5em; }
+    .role { font-size: 12px; letter-spacing: .5em; margin-top: 12px; }
+    .tx { margin-top: 22px; font-size: 12px; }
+    .data { font-size: 10.5px; }
+    .callout, #bl, #br { display: none; }
+    .mail { margin-top: 0; font-size: 11px; }
+    .mail::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="view" aria-hidden="true"></canvas>
+<main class="sr"><h1>MOSS</h1><p>DJ and producer. Transmission soon. Contact: mail@ivolopes.com</p></main>
+
+<div class="hud" id="hud">
+  <svg id="lines" aria-hidden="true"></svg>
+  <div class="blk data" id="geo" aria-hidden="true"><div><span>LAT</span><b id="lat">23.9°</b></div><div><span>LON</span><b id="lon">146.7°</b></div><div><span>DIST</span><b>1.8 AU</b></div></div>
+  <div class="blk data r" id="cam" aria-hidden="true"><div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div></div>
+  <div class="plus" id="p1"></div><div class="plus" id="p2"></div><div class="plus" id="p3"></div><div class="plus" id="p4"></div>
+  <div class="blk" id="brand">
+    <div class="wordmark" aria-hidden="true">MOSS</div>
+    <div class="role">DJ · PRODUCER</div>
+    <div class="tx">TRANSMISSION · SOON</div>
+    <div class="meter" id="meter" aria-hidden="true"></div>
+    <a class="mail" id="mail" href="mailto:mail@ivolopes.com">MAIL@IVOLOPES.COM</a>
+  </div>
+  <div class="blk callout" id="c1" aria-hidden="true">BLOOM 01 · CERAMIC<br>SPECIMEN A<br>ORIGIN UNKNOWN</div>
+  <div class="blk callout" id="c2" aria-hidden="true">MOSS · COVERAGE 100%<br>SYMBIOTIC GROWTH<br>STABLE</div>
+  <div class="blk" id="bl" aria-hidden="true"><div class="bracket">AUDIO<br>LIVE FEED<br>STABLE</div></div>
+  <div class="blk r" id="br" aria-hidden="true"><div class="bracket">SPECIMEN<br>BIOSCAN<br>V.1.0</div></div>
+  <canvas id="wave" aria-hidden="true"></canvas>
+  <div class="blk bpm" id="bpm" aria-hidden="true">124 BPM</div>
+</div>
+
+<script>
+(function () {
+  // The images. Any that is missing falls back to a generated version.
+  // `opaque`: the specimen sits on a background (not a transparent PNG), so
+  // its edges are faded out with a soft round mask.
+  const ASSETS = {
+    specimen: { src: "assets/moss-specimen.png", fallback: "assets/placeholder-specimen.png", opaque: false },
+    space: { src: "assets/moss-space.jpg" },
+    planet: { src: "assets/moss-planet.png" },
+  };
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const q = new URLSearchParams(location.search);
+  const frozen = q.has("t") ? +q.get("t") : null;
+  const $ = (s) => document.querySelector(s);
+  let phone = innerWidth < 760, W, H, PR;
+
+  /* ---------- WebGL: one pass composes every layer through the visor ---------- */
+  const canvas = $("#view");
+  const gl = canvas.getContext("webgl", { antialias: false, premultipliedAlpha: false });
+  const VS = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }";
+  const FS = `precision highp float;
+    uniform sampler2D uSpec, uSpace, uPlanet;
+    uniform float uHasSpace, uHasPlanet, uSpecOpaque, uTime, uK;
+    uniform vec2 uRes, uPar;
+    uniform vec4 uSpecBox;    // centre x, y (px), size (px), rotation
+    uniform vec4 uPlanetBox;  // centre x, y (px), radius (px), -
+    varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+      return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+    float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 6; i++){ s += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= .5; } return s; }
+    float ridge(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a * pow(1. - abs(noise(p) * 2. - 1.), 5.); p = p * 2.1 + 3.3; a *= .5; } return s; }
+    float stars(vec2 p, float s, float t){ vec2 g = p * s, id = floor(g), f = fract(g) - .5; float h = hash(id);
+      vec2 o = vec2(hash(id + 3.1), hash(id + 7.7)) - .5; return step(.93, h) * smoothstep(.08, 0., length(f - o * .7)) * (.6 + .4 * sin(t * 2. + h * 70.)) * (h - .9) * 12.; }
+    vec2 bend(vec2 c, float k){ vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp); return c * (1. + k * r2 + k * .7 * r2 * r2); }
+    float glint(vec2 p, vec2 at, vec2 s){ vec2 d = (p - at) / s; return exp(-dot(d, d)); }
+
+    vec3 space(vec2 px){
+      vec2 uv = px / uRes;
+      if (uHasSpace > .5) {
+        vec2 s = (uv - .5) * .94 + .5 + uPar * .012;          // a little overscan for the parallax
+        return texture2D(uSpace, s).rgb;
+      }
+      vec2 a = (px - uRes * .5) / uRes.y * 2.6 + uPar * .03 + vec2(uTime * .004, 0.);
+      float n = fbm(a * 1.2), m = fbm(a * 2.2 + n * 1.6 + 3.);
+      vec3 col = vec3(.004, .008, .01);
+      col += vec3(.015, .11, .095) * smoothstep(.35, .9, m) * (.5 + n);
+      col += vec3(.12, .035, .19) * smoothstep(.45, .95, n) * smoothstep(.3, .8, m);
+      col += vec3(.55, .32, .9) * pow(ridge(a * 1.4 + m), 2.2) * smoothstep(.4, .85, n) * .6;
+      col *= .55 + .45 * smoothstep(.0, .55, length(px / uRes - .5));    // darker behind the specimen
+      vec2 b = a + uPar * .015;
+      col += vec3(.9, .95, 1.) * (stars(b, 30., uTime) + stars(b, 70., uTime * 1.3) * .6 + stars(b, 150., uTime) * .35);
+      return col;
+    }
+    vec4 planet(vec2 px){
+      vec2 d = (px - uPlanetBox.xy - uPar * uRes.y * .01) / uPlanetBox.z;
+      if (uHasPlanet > .5) { vec2 u = d * .5 + .5; if (u.x < 0. || u.y < 0. || u.x > 1. || u.y > 1.) return vec4(0.); return texture2D(uPlanet, u); }
+      float r = length(d); if (r > 1.04) return vec4(0.);
+      vec3 n = normalize(vec3(d, sqrt(max(0., 1. - r * r))));
+      float lat = n.y + fbm(n.xy * 4.) * .08;
+      vec3 c = mix(vec3(.05, .12, .13), vec3(.12, .2, .22), sin(lat * 18.) * .5 + .5);
+      float nl = dot(n, normalize(vec3(-.7, .4, .6)));
+      vec3 col = c * (.01 + .5 * smoothstep(-.05, 1., nl));
+      col += vec3(.3, .75, .7) * pow(r, 7.) * smoothstep(-.3, .7, nl) * .55 + vec3(.45, .22, .75) * pow(r, 9.) * .35;
+      return vec4(col, smoothstep(1.04, 1., r));
+    }
+    vec4 specimen(vec2 px){
+      vec2 d = px - uSpecBox.xy - uPar * uRes.y * .022;
+      float c = cos(-uSpecBox.w), s = sin(-uSpecBox.w);
+      d = mat2(c, -s, s, c) * d;
+      vec2 u = d / uSpecBox.z + .5;
+      if (u.x < 0. || u.y < 0. || u.x > 1. || u.y > 1.) return vec4(0.);
+      vec4 t = texture2D(uSpec, u);
+      if (uSpecOpaque > .5) {
+        // A soft, uneven edge so the cut-out melts into space.
+        float r = length(u - .5) + (noise(u * 9.) - .5) * .05;
+        t.a = smoothstep(.5, .36, r);
+        t.rgb *= mix(.55, 1., smoothstep(.5, .3, r));
+      }
+      // A slow scan of light across the specimen.
+      float sweep = exp(-pow((u.y - fract(uTime * .05) * 1.6 + .3) * 9., 2.));
+      t.rgb += vec3(.35, 1., .5) * sweep * .06 * t.a;
+      return t;
+    }
+    vec3 compose(vec2 uv){
+      vec2 px = vec2(uv.x, 1. - uv.y) * uRes;   // top-left origin, like the page
+      vec3 col = space(px);
+      vec4 p = planet(px); col = mix(col, p.rgb, p.a);
+      vec4 s = specimen(px); col = mix(col, s.rgb, s.a);
+      return col;
+    }
+    void main(){
+      vec2 c = vUv * 2. - 1.;
+      vec2 src = bend(c, uK);
+      vec2 uv = src * .5 + .5;
+      vec2 e = min(uv, 1. - uv); float inside = min(e.x, e.y);
+      vec3 col;
+      if (inside < 0.) {
+        float d = -inside;
+        col = vec3(.012, .016, .018) + vec3(.03, .035, .03) * exp(-d * 30.);
+        col += vec3(.75, .8, .7) * exp(-d * 260.) * .5;
+        float band = exp(-d * 55.);
+        float gl = glint(vUv, vec2(.07, .86), vec2(.022, .05)) + glint(vUv, vec2(.16, .93), vec2(.05, .012))
+                 + glint(vUv, vec2(.93, .86), vec2(.022, .05)) + glint(vUv, vec2(.84, .93), vec2(.05, .012))
+                 + glint(vUv, vec2(.07, .14), vec2(.02, .04)) * .6 + glint(vUv, vec2(.93, .14), vec2(.02, .04)) * .6;
+        col += vec3(1., .9, .75) * gl * band * 1.3;
+        col += (hash(vUv * uRes) - .5) * .02;
+      } else {
+        vec2 asp = vec2(uRes.x / uRes.y, 1.); vec2 a = c * asp; float r2 = dot(a, a) / dot(asp, asp);
+        float ca = .006 * r2 * r2 + .0012;
+        col = vec3(compose((src * (1. + ca)) * .5 + .5).r, compose(uv).g, compose((src * (1. - ca)) * .5 + .5).b);
+        col *= .55 + .45 * smoothstep(0., .16, inside);
+        col += vec3(.85, .9, 1.) * glint(vUv, vec2(.2, .86), vec2(.18, .05)) * .05;
+        col += vec3(.7, .8, .75) * exp(-inside * 140.) * .16;
+        col *= .95 + .05 * sin(gl_FragCoord.y * 1.4);
+        col += (hash(vUv * uRes + fract(uTime) * 91.) - .5) * .03;
+      }
+      gl_FragColor = vec4(col, 1.);
+    }`;
+  const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const U = {};
+  ["uSpec", "uSpace", "uPlanet", "uHasSpace", "uHasPlanet", "uSpecOpaque", "uTime", "uK", "uRes", "uPar", "uSpecBox", "uPlanetBox"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
+  gl.uniform1i(U.uSpec, 0); gl.uniform1i(U.uSpace, 1); gl.uniform1i(U.uPlanet, 2);
+
+  function texture(unit, img) {
+    const t = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+  }
+  const load = (src) => new Promise((res) => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  const empty = new Uint8Array([0, 0, 0, 0]);
+  [0, 1, 2].forEach((u) => { gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, gl.createTexture()); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, empty); });
+
+  /* ---------- Layout ---------- */
+  let spec = { x: 0, y: 0, size: 0 }, planetBox = { x: 0, y: 0, r: 0 };
+  function layout() {
+    phone = innerWidth < 760; W = innerWidth; H = innerHeight; PR = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * PR); canvas.height = Math.round(H * PR);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uK, phone ? .2 : .28);
+    spec = phone ? { x: W * .5, y: H * .36, size: Math.min(W * 1.05, H * .56) } : { x: W * .5, y: H * .47, size: H * .74 };
+    planetBox = phone ? { x: W * .92, y: H * .02, r: W * .55 } : { x: W * .86, y: H * .22, r: H * .34 };
+    const set = (id, css) => Object.assign($(id).style, css);
+    if (!phone) {
+      set("#geo", { left: "8.5%", top: "21%" }); set("#cam", { right: "8.5%", top: "21%" });
+      set("#p1", { left: "6.5%", top: "24%" }); set("#p2", { right: "6.5%", top: "24%" }); set("#p3", { left: "8.5%", top: "29%" }); set("#p4", { right: "13%", top: "53%" });
+      set("#brand", { left: "6.8%", top: "43%" });
+      set("#bl", { left: "7%", bottom: "11%" }); set("#br", { right: "7%", bottom: "11%" });
+    } else {
+      set("#geo", { left: "10%", top: "10%" }); set("#cam", { right: "10%", top: "10%" });
+      set("#p1", { left: "5%", top: "8%" }); set("#p2", { right: "5%", top: "8%" }); set("#p3", { left: "5%", top: "14%" }); set("#p4", { right: "5%", top: "14%" });
+      set("#brand", { left: "0", right: "0", top: "66%", textAlign: "center" });
+      set("#mail", { position: "fixed", left: "0", right: "0", bottom: "8%", justifyContent: "center", display: "flex" });
+    }
+    const wave = $("#wave"), ww = phone ? W * .62 : W * .38;
+    wave.width = ww * PR; wave.height = 44 * PR;
+    Object.assign(wave.style, { width: `${ww}px`, height: "44px", left: `${(W - ww) / 2 - (phone ? 18 : 30)}px`, bottom: phone ? "13.5%" : "10.5%" });
+    set("#bpm", { left: `${(W + ww) / 2 - (phone ? 10 : 22)}px`, bottom: phone ? "calc(13.5% + 15px)" : "calc(10.5% + 15px)" });
+    $("#meter").innerHTML = Array.from({ length: 14 }, (_, i) => `<i class="${i > 10 ? "off" : ""}"></i>`).join("") + "<b></b>";
+    if (phone) $("#meter").style.justifyContent = "center";
+  }
+  addEventListener("resize", layout);
+
+  // Where a flat point lands on screen after the lens (inverse of bend()).
+  function onScreen(x, y) {
+    const k = phone ? .2 : .28, asp = W / H, norm = asp * asp + 1;
+    const tx = (x / W) * 2 - 1, ty = (y / H) * 2 - 1;
+    let px = tx, py = ty;
+    for (let i = 0; i < 10; i++) { const r2 = ((px * asp) ** 2 + py * py) / norm, s = 1 + k * r2 + k * .7 * r2 * r2; px = tx / s; py = ty / s; }
+    return [(px + 1) / 2 * W, (py + 1) / 2 * H];
+  }
+
+  /* ---------- HUD lines and waveform ---------- */
+  const lines = $("#lines");
+  function drawLines(sx, sy) {
+    const [cx, cy] = onScreen(sx, sy), [ex] = onScreen(sx + spec.size * .43, sy), R = Math.abs(ex - cx);
+    let h = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(168,240,160,.32)" stroke-dasharray="2 5"/>`;
+    h += `<path d="M${cx - 6},${cy - R - 14} L${cx + 6},${cy - R - 14} L${cx},${cy - R - 4} Z" fill="none" stroke="rgba(168,240,160,.7)"/>`;
+    if (!phone) {
+      h += `<path d="M${cx},${cy + R + 4} L${cx - 4},${cy + R + 12} L${cx + 4},${cy + R + 12} Z" fill="rgba(168,240,160,.7)"/>`;
+      const sx2 = cx + R + 70;
+      for (let i = 0; i <= 12; i++) { const y = cy - R * .55 + (i / 12) * R * 1.1; h += `<line x1="${sx2}" y1="${y}" x2="${sx2 + (i % 4 ? 5 : 11)}" y2="${y}" stroke="rgba(168,240,160,${i % 4 ? .35 : .7})"/>`; }
+      h += `<line x1="${sx2}" y1="${cy - R * .55}" x2="${sx2}" y2="${cy + R * .55}" stroke="rgba(168,240,160,.35)"/>`;
+      [[.16, -.2, -.62, $("#c1")], [.2, .24, .72, $("#c2")]].forEach(([ax, ay, oy, el]) => {
+        const [px, py] = onScreen(sx + ax * spec.size, sy + ay * spec.size);
+        const lx = cx + R * (oy > 0 ? 1.12 : .95), ly = cy + R * oy;
+        el.style.left = `${lx + 12}px`; el.style.top = `${ly - 10}px`;
+        h += `<polyline points="${px},${py} ${lx - 26},${ly} ${lx + 6},${ly}" fill="none" stroke="rgba(168,240,160,.6)"/><circle cx="${px}" cy="${py}" r="2" fill="rgba(168,240,160,.9)"/>`;
+      });
+    }
+    lines.innerHTML = h;
+  }
+  const wave = $("#wave"), wg = wave.getContext("2d");
+  function drawWave(t) {
+    const w = wave.width, h = wave.height, mid = h / 2, pr = PR;
+    wg.clearRect(0, 0, w, h);
+    const beat = Math.pow(1 - (((t * 124) / 60) % 1), 3);
+    wg.strokeStyle = "rgba(168,240,160,.9)"; wg.lineWidth = pr; wg.shadowColor = "rgba(140,255,140,.8)"; wg.shadowBlur = 6 * pr;
+    wg.beginPath();
+    for (let x = 0; x < w; x += 2 * pr) {
+      const u = x / w, env = Math.pow(Math.sin(u * Math.PI), .8);
+      const a = env * Math.abs(Math.sin(u * 211 + t * 9) * Math.sin(u * 37 - t * 4) * Math.sin(u * 13 + t)) * (.25 + beat * .75) * mid * .95 + .6 * pr;
+      wg.moveTo(x, mid - a); wg.lineTo(x, mid + a);
+    }
+    wg.stroke();
+    wg.shadowBlur = 0; wg.strokeStyle = "rgba(168,240,160,.35)"; wg.setLineDash([2 * pr, 3 * pr]);
+    wg.beginPath(); wg.moveTo(0, mid); wg.lineTo(w, mid); wg.stroke(); wg.setLineDash([]);
+  }
+
+  /* ---------- Pointer and tilt parallax ---------- */
+  const look = { x: 0, y: 0, tx: 0, ty: 0 };
+  addEventListener("pointermove", (e) => { look.tx = (e.clientX / innerWidth) * 2 - 1; look.ty = (e.clientY / innerHeight) * 2 - 1; });
+  addEventListener("deviceorientation", (e) => { if (e.gamma != null) { look.tx = Math.max(-1, Math.min(1, e.gamma / 30)); look.ty = Math.max(-1, Math.min(1, (e.beta - 45) / 30)); } });
+
+  /* ---------- Go ---------- */
+  Promise.all([
+    load(ASSETS.specimen.src).then((i) => i ? { i, opaque: ASSETS.specimen.opaque } : load(ASSETS.specimen.fallback).then((f) => ({ i: f, opaque: true }))),
+    load(ASSETS.space.src), load(ASSETS.planet.src),
+    document.fonts ? document.fonts.ready : null,
+  ]).then(([s, space, planet]) => {
+    if (s.i) texture(0, s.i);
+    gl.uniform1f(U.uSpecOpaque, s.opaque ? 1 : 0);
+    if (space) texture(1, space);
+    if (planet) texture(2, planet);
+    gl.uniform1f(U.uHasSpace, space ? 1 : 0);
+    gl.uniform1f(U.uHasPlanet, planet ? 1 : 0);
+    layout();
+    $("#hud").classList.add("on");
+    const t0 = performance.now();
+    (function frame(now) {
+      const t = frozen ?? (still ? 12 : (now - t0) / 1000);
+      look.x += (look.tx - look.x) * .04; look.y += (look.ty - look.y) * .04;
+      // The specimen floats: a slow drift, a gentle turn, a breath.
+      const breathe = 1 + Math.sin(t * .5) * .012;
+      const sx = spec.x + Math.sin(t * .23) * W * .004, sy = spec.y + Math.sin(t * .31) * H * .008;
+      gl.uniform4f(U.uSpecBox, sx * PR, sy * PR, spec.size * breathe * PR, Math.sin(t * .11) * .05);
+      gl.uniform4f(U.uPlanetBox, planetBox.x * PR, planetBox.y * PR, planetBox.r * PR, 0);
+      gl.uniform2f(U.uPar, look.x, look.y);
+      gl.uniform1f(U.uTime, t);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      drawLines(sx, sy);
+      drawWave(t);
+      $("#lat").textContent = `${(23.9 + Math.sin(t * .07) * .2).toFixed(1)}°`;
+      $("#lon").textContent = `${(146.7 + t * .002).toFixed(1)}°`;
+      document.body.dataset.ready = "1";
+      if (!still || frozen != null) requestAnimationFrame(frame);
+    })(performance.now());
+  });
+})();
+</script>
+</body>
+</html>

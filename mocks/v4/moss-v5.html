@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   /* Layers edited out of the mock itself: the plate (space, planet, asteroids,
      the fish-eye glass) and the bloom. Everything else is live: the HUD, the
@@ -18,13 +18,13 @@
   /* Typography spec (from the mock): Rajdhani wordmark, Share Tech Mono HUD,
      a restrained phosphor glow, and a colour hierarchy from bright to dim. */
   :root {
-    --g: #9CF59A; --g2: #A4E9A1; --tel: #B0E8A7; --dim: #729D78; --line: #91D89A;
-    --glow-word: 0 0 2px rgba(156, 245, 154, .8), 0 0 8px rgba(109, 255, 131, .28), 0 0 18px rgba(109, 255, 131, .1);
-    --glow: 0 0 2px rgba(156, 245, 154, .35), 0 0 6px rgba(109, 255, 131, .12);
+    --g: #a6f7a0; --g2: #b9f3b0; --tel: #bdf3b4; --dim: #86b98a; --line: #9be3a2;
+    --glow-word: 0 0 2px rgba(190, 255, 180, .9), 0 0 9px rgba(110, 255, 130, .6), 0 0 22px rgba(90, 255, 120, .3);
+    --glow: 0 0 1px rgba(200, 255, 190, .8), 0 0 6px rgba(110, 255, 130, .5), 0 0 14px rgba(90, 255, 120, .22);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; }
-  body { color: var(--g); font-family: "Share Tech Mono", ui-monospace, monospace; -webkit-font-smoothing: antialiased; }
+  body { color: var(--g); font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; -webkit-font-smoothing: antialiased; }
   @media (pointer: fine) { html, body, a { cursor: none; } }
   a { color: inherit; text-decoration: none; }
 
@@ -52,7 +52,12 @@
   .t.r { text-align: right; }
   .t.c { text-align: center; transform: translateX(-50%); }
   .dim { opacity: .8; }
-  .word { font-family: "Rajdhani", sans-serif; font-weight: 500; font-size: calc(var(--h) * .072); letter-spacing: .5em; line-height: 1; color: var(--g); opacity: 1; text-shadow: var(--glow-word); }
+  /* The wordmark is drawn as thin pixel-LCD lettering (SVG), like the mock. */
+  .word { opacity: 1; line-height: 0; }
+  .word svg { display: block; height: calc(var(--h) * .052); width: auto; overflow: visible;
+    filter: drop-shadow(0 0 1.5px rgba(200, 255, 190, .95)) drop-shadow(0 0 7px rgba(110, 255, 130, .65)) drop-shadow(0 0 18px rgba(90, 255, 120, .3)); }
+  .t.c.word svg { margin: 0 auto; }
+  @media (max-aspect-ratio: 4/5) { .word svg { height: calc(var(--h) * .036); } }
   .role { font-size: calc(var(--h) * .021); letter-spacing: .55em; color: var(--g2); opacity: .9; }
   .tx { font-size: calc(var(--h) * .02); letter-spacing: .2em; color: var(--g2); opacity: .92; }
   .mail { font-size: calc(var(--h) * .016); letter-spacing: .16em; color: var(--g); opacity: .9; pointer-events: auto; }
@@ -68,12 +73,12 @@
   @keyframes blink { 60% { opacity: .35; } }
   svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 2px rgba(109, 255, 131, .35)); }
   canvas.wave { position: absolute; }
-  .meter { position: absolute; display: flex; align-items: center; gap: 2px; }
-  .meter i { flex: none; width: 4px; height: 6px; background: var(--g); box-shadow: 0 0 3px rgba(109, 255, 131, .45); }
-  .meter i.off { background: var(--dim); opacity: .3; box-shadow: none; }
-  .meter s { flex: 1; height: 1px; background: var(--line); opacity: .35; margin-left: 6px; }
-  .meter b { width: 1px; height: 8px; background: var(--line); opacity: .7; }
-  @media (max-aspect-ratio: 4/5) { .meter i { width: 3px; height: 5px; } }
+  .meter { position: absolute; display: flex; align-items: center; gap: 1px; height: 8px; }
+  .meter i { flex: none; width: 3px; height: 6px; background: var(--g); box-shadow: 0 0 4px rgba(110, 255, 130, .7); }
+  .meter i.off { width: 1px; margin: 0 1px; background: var(--g); opacity: .38; box-shadow: none; }
+  .meter s { flex: 1; height: 0; border-top: 1px dotted var(--line); opacity: .45; margin: 0 6px; }
+  .meter b { width: 1px; height: 7px; background: var(--line); opacity: .75; margin-right: 18%; }
+  .meter b + b { margin-right: 0; }
 
   /* Glass, grain, scanlines, signal flicker */
   .shine { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: screen; overflow: hidden; }
@@ -96,7 +101,8 @@
   .reticle b { position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; }
   .reticle b::before, .reticle b::after { content: ""; position: absolute; background: rgba(156, 245, 154, .9); }
   .reticle b::before { left: 4px; top: 0; width: 1px; height: 9px; } .reticle b::after { top: 4px; left: 0; height: 1px; width: 9px; }
-  .reticle span { position: absolute; left: calc(100% + 10px); top: -2px; white-space: nowrap; font-size: 12px; letter-spacing: .12em; color: var(--g); text-shadow: var(--glow); }
+  .reticle span { position: absolute; left: calc(100% + 10px); top: -2px; white-space: nowrap; font-size: 11px; line-height: 1.5; letter-spacing: .12em; color: var(--g); text-shadow: var(--glow); }
+  .reticle span small { font-size: 9px; opacity: .7; }
 
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   @media (prefers-reduced-motion: reduce) { .plate, .bloom, .bloom img, .scan-b, .shine::before, .grain, .blink { animation: none !important; } }
@@ -129,7 +135,7 @@
       hud: [
         ["t", .085, .105, `<div><span class="dim">LAT&nbsp;&nbsp;</span><b id="lat">23.9°</b></div><div><span class="dim">LON&nbsp;&nbsp;</span><b id="lon">146.7°</b></div><div><span class="dim">DIST&nbsp;</span>1.8 AU</div>`],
         ["t r", .914, .105, `<div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div>`],
-        ["t word", .069, .372, "MOSS"],
+        ["t word", .071, .382, "WORDMARK"],
         ["t role", .071, .455, "DJ · PRODUCER"],
         ["t tx", .071, .525, `TRANSMISSION · <span class="blink">SOON</span>`],
         ["mail t", .052, .615, `<span class="tri"></span>MAIL@IVOLOPES.COM`, "mailto:mail@ivolopes.com"],
@@ -152,7 +158,7 @@
       hud: [
         ["t", .12, .085, `<div><span class="dim">LAT&nbsp;&nbsp;</span><b id="lat">23.9°</b></div><div><span class="dim">LON&nbsp;&nbsp;</span><b id="lon">146.7°</b></div><div><span class="dim">DIST&nbsp;</span>1.8 AU</div>`],
         ["t r", .88, .085, `<div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div>`],
-        ["t c word", .5, .665, "MOSS"],
+        ["t c word", .5, .672, "WORDMARK"],
         ["t c role", .5, .728, "DJ · PRODUCER"],
         ["t c tx", .5, .778, `TRANSMISSION · <span class="blink">SOON</span>`],
         ["t bpm", .64, .854, "|&nbsp;&nbsp;124 BPM"],
@@ -165,6 +171,20 @@
       font: { t: .0112, word: .052, role: .0135, tx: .0138, mail: .0115 },
     },
   };
+  // M O S S as thin pixel-LCD letters: 6 x 10 units each, chamfered corners, LCD lines.
+  const GLYPH = {
+    M: "M0.5,10 V1.5 L1.5,0.5 L3,4.5 L4.5,0.5 L5.5,1.5 V10",
+    O: "M1.5,0.5 H4.5 L5.5,1.5 V9 L4.5,10 H1.5 L0.5,9 V1.5 Z",
+    S: "M5.5,2 V1.5 L4.5,0.5 H1.5 L0.5,1.5 V4.2 L1.5,5.2 H4.5 L5.5,6.2 V9 L4.5,10 H1.5 L0.5,9 V8.5",
+  };
+  const WORDMARK = (() => {
+    const adv = 15.5, letters = [..."MOSS"];
+    const w = adv * (letters.length - 1) + 6;
+    const paths = letters.map((ch, i) => `<path d="${GLYPH[ch]}" transform="translate(${i * adv} 0)"/>`).join("");
+    return `<svg viewBox="-.5 -.3 ${w + 1} 11" role="img" aria-label="MOSS"><defs><pattern id="lcd" width="1" height=".55" patternUnits="userSpaceOnUse"><rect width="1" height=".4" fill="#fff"/></pattern><mask id="lcdm"><rect x="-1" y="-1" width="${w + 3}" height="13" fill="url(#lcd)"/></mask></defs>` +
+      `<g fill="none" stroke="#b4f8ac" stroke-width="1.05" stroke-linejoin="miter" stroke-linecap="square">${paths}</g>` +
+      `<g fill="none" stroke="#eaffe4" stroke-width=".35" stroke-linejoin="miter" mask="url(#lcdm)" opacity=".55">${paths}</g></svg>`;
+  })();
   const $ = (id) => document.getElementById(id);
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const q = new URLSearchParams(location.search);
@@ -189,14 +209,15 @@
       L.hud.map(([cls, x, y, html, href, id]) => {
         const tag = href ? "a" : "div";
         const style = cls.split(" ").includes("r") ? `right:${(1 - x) * 100}%;top:${y * 100}%` : `left:${x * 100}%;top:${y * 100}%`;
+        if (html === "WORDMARK") html = WORDMARK;
         return `<${tag} class="${cls}" style="${style}"${href ? ` href="${href}"` : ` aria-hidden="true"`}${id ? ` id="${id}"` : ""}>${html}</${tag}>`;
       }).join("");
     if (L.font) {
       const f = L.font;
       hud.querySelectorAll(".t").forEach((el) => { el.style.fontSize = `calc(var(--h) * ${el.classList.contains("word") ? f.word : el.classList.contains("role") ? f.role : el.classList.contains("tx") ? f.tx : el.classList.contains("mail") ? f.mail : f.t})`; });
     }
-    const segs = L === LAYOUT.phone ? 18 : 20;
-    $("meter").innerHTML = Array.from({ length: segs }, (_, i) => `<i class="${i > segs * .55 ? "off" : ""}"></i>`).join("") + "<s></s><b></b>";
+    const on = L === LAYOUT.phone ? 10 : 12, off = L === LAYOUT.phone ? 22 : 26;
+    $("meter").innerHTML = Array.from({ length: on }, () => "<i></i>").join("") + Array.from({ length: off }, () => '<i class="off"></i>').join("") + "<s></s><b></b><s></s><b></b>";
     place();
   }
   function place() {
@@ -243,18 +264,24 @@
   function wave(t) {
     const c = $("wave"), g = c.getContext("2d"), w = c.width, h = c.height, mid = h / 2, pr = Math.min(devicePixelRatio || 1, 2);
     g.clearRect(0, 0, w, h);
-    const beat = Math.pow(1 - (((t * 124) / 60) % 1), 3);
-    g.strokeStyle = "rgba(156,245,154,.92)"; g.lineWidth = 1.1 * pr; g.shadowColor = "rgba(109,255,131,.5)"; g.shadowBlur = 4 * pr;
+    const beatPos = ((t * 124) / 60) % 1, beat = Math.pow(1 - beatPos, 2.5);
+    // A few bursts that drift along the line; the biggest one hits on the beat.
+    const bursts = [[(.12 + t * .021) % 1, .02, .5 + beat * .5], [(.6 + t * .013) % 1, .06, .3 + beat * .75], [(.86 + t * .031) % 1, .025, .3 + beat * .35]];
+    g.strokeStyle = "rgba(170,250,160,.95)"; g.lineWidth = 1.15 * pr; g.shadowColor = "rgba(110,255,130,.85)"; g.shadowBlur = 5 * pr;
     g.beginPath();
-    for (let x = 0; x < w; x += 3 * pr) {
-      const u = x / w, env = Math.pow(Math.sin(u * Math.PI), .7) * (.35 + .65 * Math.pow(Math.abs(Math.sin(u * 7.3 + 1.1)), 1.5));
-      const n = Math.abs(Math.sin(u * 311 + t * 7) * Math.sin(u * 53 - t * 3.1) * Math.sin(u * 17 + t * .7));
-      const a = (env * n * (.35 + beat * .65) + .03) * mid * .95;
-      g.moveTo(x, mid - a); g.lineTo(x, mid + a);
+    const step = 5 * pr;
+    for (let x = 0; x < w; x += step) {
+      const u = x / w;
+      let a = 0;
+      for (const [c0, sp, amp] of bursts) { const d = (u - c0) / sp; a += amp * Math.exp(-d * d); }
+      a *= .55 + .45 * Math.abs(Math.sin(u * 410 + t * 9) * Math.cos(u * 97 - t * 5));
+      if (a < .12 || Math.sin(u * 900 + t * 3) > .6) continue;
+      const hh = Math.min(1, a) * mid * .96;
+      g.moveTo(x, mid - hh); g.lineTo(x, mid + hh);
     }
     g.stroke();
-    g.shadowBlur = 0; g.fillStyle = "rgba(145,216,154,.35)";
-    for (let x = 0; x < w; x += 5 * pr) g.fillRect(x, mid - pr / 2, pr, pr);
+    g.shadowBlur = 2 * pr; g.fillStyle = "rgba(160,240,155,.7)";
+    for (let x = 0; x < w; x += step) g.fillRect(x - pr * .6, mid - pr * .6, pr * 1.2, pr * 1.2);
   }
 
   /* ---------- Reticle cursor: follows the mouse, locks onto the bloom ---------- */
@@ -271,7 +298,11 @@
     cur.x += (tx - cur.x) * .35; cur.y += (ty - cur.y) * .35; cur.s += (ts - cur.s) * .25;
     ret.style.width = ret.style.height = `${cur.s}px`;
     ret.style.transform = `translate(${cur.x - cur.s / 2}px, ${cur.y - cur.s / 2}px)`;
-    coords.textContent = cur.lock > .6 ? "TARGET LOCKED · MOSS-01" : `${(23.9 + (mouse.y / innerHeight - .5) * -.4).toFixed(2)}°  ${(146.7 + (mouse.x / innerWidth - .5) * .6).toFixed(2)}°`;
+    // The cursor is a frequency scanner: across = 20 Hz to 20 kHz, up and down = gain.
+    const hz = 20 * Math.pow(1000, Math.min(1, Math.max(0, mouse.x / innerWidth)));
+    const db = Math.round(6 - (mouse.y / innerHeight) * 54);
+    const f = hz >= 1000 ? `${(hz / 1000).toFixed(hz >= 10000 ? 1 : 2)} KHZ` : `${Math.round(hz)} HZ`;
+    coords.innerHTML = cur.lock > .6 ? "TARGET LOCKED · MOSS-01<br><small>SIGNAL 124 BPM · ROOT A1</small>" : `${f}<br><small>${db > 0 ? "+" : ""}${db} DB</small>`;
   }
 
   /* ---------- Loop ---------- */

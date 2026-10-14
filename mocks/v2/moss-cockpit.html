@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MOSS · cockpit (mock)</title>
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --phos: #9cf59a; --phos-dim: #5fae63; --faint: rgba(156, 245, 154, .22); --violet: #b78cff; --violet-faint: rgba(183, 140, 255, .28);
+    --glow: 0 0 6px rgba(156, 245, 154, .55), 0 0 18px rgba(120, 230, 120, .18);
+    --mono: "IBM Plex Mono", ui-monospace, monospace; --crt: "VT323", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; color: var(--phos); }
+  body { font: 400 12px/1.45 var(--mono); overflow: hidden; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+
+  /* The real specimen renders here, off to the side; the porthole samples it. */
+  #specimen { position: fixed; inset: 0; width: 100%; height: 100%; visibility: hidden; }
+
+  /* ---------- Cabin: dark glass behind everything, with a slow star drift ---------- */
+  .cabin { position: fixed; inset: 0;
+    background: radial-gradient(90% 70% at 50% 45%, #0c0718 0%, #05030b 55%, #000 100%); }
+  .cabin::before { content: ""; position: absolute; inset: 0; opacity: .5;
+    background-image: radial-gradient(1px 1px at 10% 20%, #fff, transparent), radial-gradient(1px 1px at 80% 30%, #cfe, transparent),
+      radial-gradient(1px 1px at 30% 70%, #fff, transparent), radial-gradient(1px 1px at 65% 85%, #dcf, transparent), radial-gradient(1px 1px at 90% 60%, #fff, transparent);
+    background-size: 340px 340px; animation: drift 120s linear infinite; }
+  @keyframes drift { to { background-position: -340px 120px; } }
+
+  /* ---------- The bulging canopy frame around the whole screen ---------- */
+  .frame { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; }
+
+  /* ---------- HUD layout inside the canopy ---------- */
+  .hud { position: fixed; inset: 0; z-index: 3; display: grid; gap: 14px; pointer-events: none;
+    padding: 5.5vh 6vw 6.5vh;
+    grid-template-columns: minmax(230px, 1fr) auto minmax(230px, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "top top top" "left port right" "bottom bottom bottom"; perspective: 900px; }
+  .hud a { pointer-events: auto; }
+  .topline { grid-area: top; display: flex; justify-content: space-between; gap: 12px; font: 15px var(--crt); letter-spacing: .14em; color: var(--phos-dim); }
+  .topline b { color: var(--phos); font-weight: 400; text-shadow: var(--glow); }
+  .topline .v { color: var(--violet); }
+  .left { grid-area: left; display: grid; gap: 12px; align-content: center; transform: rotateY(14deg); transform-origin: 0 50%; }
+  .right { grid-area: right; display: grid; gap: 12px; align-content: center; transform: rotateY(-14deg); transform-origin: 100% 50%; }
+  .bottom { grid-area: bottom; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 14px; transform: rotateX(16deg); transform-origin: 50% 100%; }
+
+  .wordmark { font: 400 clamp(64px, 7.5vw, 116px)/.82 var(--crt); letter-spacing: .1em; text-shadow: var(--glow); }
+  .role { margin-top: 8px; font: 19px var(--crt); letter-spacing: .32em; color: var(--phos-dim); }
+  .caption { margin-top: 8px; font: 18px/1.15 var(--crt); color: var(--violet); text-shadow: 0 0 10px rgba(183, 140, 255, .45); }
+
+  /* Chamfered cockpit screens. */
+  .panel { position: relative; padding: 9px 12px 11px; background: linear-gradient(180deg, rgba(10, 22, 14, .72), rgba(4, 10, 8, .72));
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    box-shadow: inset 0 0 0 1px var(--faint), inset 0 0 30px rgba(120, 230, 120, .05); }
+  .panel::after { content: ""; position: absolute; top: 0; right: 0; width: 34%; height: 2px; background: var(--violet); opacity: .7; }
+  .panel h2 { font: 400 18px/1 var(--crt); letter-spacing: .1em; padding-bottom: 6px; margin-bottom: 7px; border-bottom: 1px solid var(--faint); display: flex; justify-content: space-between; text-shadow: var(--glow); }
+  .panel h2 span { color: var(--phos-dim); }
+  dl div { display: flex; gap: 8px; }
+  dt { color: var(--phos-dim); min-width: 64px; }
+  table { width: 100%; border-collapse: collapse; font: 18px/1.25 var(--crt); }
+  th { text-align: left; font-weight: 400; color: var(--phos-dim); }
+  td { text-align: right; padding-left: 10px; text-shadow: var(--glow); }
+  td:last-child { color: var(--phos-dim); width: 34px; }
+  #feed { list-style: none; font: 15px/1.3 var(--crt); color: var(--phos-dim); max-height: 22vh; overflow: hidden; }
+  #feed li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #feed li:last-child { color: var(--phos); text-shadow: var(--glow); }
+  #gauge { width: 100%; height: 120px; display: block; }
+  #map { width: 100%; height: 70px; display: block; image-rendering: pixelated; }
+  #spectrum { width: 100%; height: 56px; display: block; }
+  .soon { font: 34px/1 var(--crt); letter-spacing: .34em; text-shadow: var(--glow); text-align: center; }
+  .soon small { display: block; font-size: 15px; letter-spacing: .3em; color: var(--violet); margin-top: 4px; }
+  .mail { font: 17px var(--crt); letter-spacing: .14em; text-decoration: none; text-shadow: var(--glow); text-align: right; }
+  .mail:hover { color: #fff; }
+  .blink { animation: blink 1.4s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+
+  /* ---------- The porthole ---------- */
+  .port { grid-area: port; align-self: center; justify-self: center; position: relative; width: min(58vh, 40vw); aspect-ratio: 1; pointer-events: auto; }
+  .ring { position: absolute; inset: -7%; border-radius: 50%;
+    background:
+      radial-gradient(closest-side, transparent 86%, rgba(0, 0, 0, .9) 87%, transparent 89%),
+      conic-gradient(from 210deg, #1a1c22, #4a4f5c, #20232a, #5c6270, #1a1c22, #3c414c, #15171c, #4f5562, #1a1c22);
+    box-shadow: 0 0 0 1px #000, 0 20px 60px rgba(0, 0, 0, .8), inset 0 0 0 2px rgba(255, 255, 255, .08); }
+  .ring::after { content: ""; position: absolute; inset: 6.6%; border-radius: 50%; box-shadow: 0 0 0 2px rgba(156, 245, 154, .35), 0 0 22px rgba(156, 245, 154, .25), inset 0 0 40px rgba(0, 0, 0, .9); }
+  .bolt { position: absolute; width: 2.2%; height: 2.2%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9aa1ae, #2a2d34 70%); box-shadow: 0 1px 1px #000; transform: translate(-50%, -50%); }
+  #view { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; display: block; }
+  .port-hud { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .port-hud .spin { transform-origin: 0 0; animation: spin 90s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .glare { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    background:
+      radial-gradient(60% 40% at 32% 18%, rgba(255, 255, 255, .13), transparent 60%),
+      radial-gradient(30% 12% at 72% 86%, rgba(183, 140, 255, .10), transparent 70%),
+      radial-gradient(closest-side, transparent 78%, rgba(0, 0, 0, .55) 100%); }
+
+  /* ---------- Glass overlays: grain, scanlines, a fisheye vignette ---------- */
+  .grain { position: fixed; inset: -50%; pointer-events: none; opacity: .1; mix-blend-mode: screen; z-index: 7;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grain 1s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0, 0); } 33% { transform: translate(-3%, 2%); } 66% { transform: translate(2%, -3%); } }
+  .scan { position: fixed; inset: 0; pointer-events: none; z-index: 7; background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .25) 0 1px, transparent 1px 3px); }
+  .reticle { position: fixed; width: 54px; height: 54px; margin: -27px 0 0 -27px; pointer-events: none; opacity: 0; transition: opacity .3s; border: 1px solid rgba(156, 245, 154, .7); z-index: 8; }
+  .reticle.on { opacity: 1; }
+  .reticle span { position: absolute; left: 62px; top: -4px; white-space: nowrap; font: 15px var(--crt); text-shadow: var(--glow); }
+
+  /* ---------- Phones: porthole up top, the key screens below ---------- */
+  @media (max-width: 860px) {
+    body { overflow-y: auto; overflow-x: hidden; }
+    .hud { position: relative; inset: auto; min-height: 100svh; padding: max(26px, env(safe-area-inset-top)) 22px max(30px, env(safe-area-inset-bottom)); perspective: none;
+      grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto auto auto;
+      grid-template-areas: "top top" "title title" "port port" "left right" "bottom bottom"; gap: 12px; }
+    .topline { font-size: 12px; }
+    .topline .hide-s { display: none; }
+    .title { grid-area: title; text-align: center; }
+    .wordmark { font-size: 72px; }
+    .role { font-size: 15px; }
+    .caption { font-size: 15px; }
+    .port { width: min(84vw, 52svh); margin: 10px 0 6px; }
+    .left, .right, .bottom { transform: none; }
+    .left .title-d, .right .gauge-p, .bottom .map-p { display: none; }
+    .panel h2 { font-size: 15px; }
+    dl { font-size: 10px; } dl div { flex-direction: column; gap: 0; margin-bottom: 3px; } dt { min-width: 0; }
+    table { font-size: 15px; }
+    #feed { max-height: 120px; font-size: 13px; }
+    .bottom { grid-template-columns: 1fr; }
+    .mail { text-align: center; }
+  }
+  @media (min-width: 861px) { .title { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .grain, .blink, .cabin::before, .port-hud .spin { animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="specimen" aria-hidden="true"></canvas>
+<div class="cabin" aria-hidden="true"></div>
+
+<div class="hud">
+  <div class="topline" aria-hidden="true">
+    <span><b>VESSEL // MOSS</b> <span class="hide-s">· DECK 04 · OBSERVATION</span></span>
+    <span class="hide-s v">CABIN PRESSURE NOMINAL</span>
+    <span>T+<span id="clock">00:00</span></span>
+  </div>
+
+  <header class="title"><h1 class="wordmark">MOSS</h1><p class="role">DJ · PRODUCER</p><p class="caption">something is growing out there.</p></header>
+
+  <div class="left">
+    <header class="title-d"><p class="wordmark" aria-hidden="true">MOSS</p><p class="role">DJ · PRODUCER</p><p class="caption">something is growing out there.</p></header>
+    <section class="panel" aria-label="Specimen record">
+      <h2>SPECIMEN // MOSS-01</h2>
+      <dl>
+        <div><dt>CLASS</dt><dd>BRYOPHYTA / AUDIO</dd></div>
+        <div><dt>ORIGIN</dt><dd>PORTO 41.15N 8.61W</dd></div>
+        <div><dt>STATUS</dt><dd class="blink">GERMINATING</dd></div>
+      </dl>
+    </section>
+    <section class="panel" aria-label="Growth log">
+      <h2>GROWTH LOG</h2>
+      <table><tbody>
+        <tr><th>HUMIDITY</th><td id="v-hum">98.2</td><td>%</td></tr>
+        <tr><th>COVERAGE</th><td id="v-cov">00.0</td><td>%</td></tr>
+        <tr><th>TEMPO</th><td>124</td><td>BPM</td></tr>
+        <tr><th>SIGNAL</th><td id="v-sig">-48</td><td>DB</td></tr>
+      </tbody></table>
+    </section>
+  </div>
+
+  <div class="port" id="port" aria-label="Observation window: specimen MOSS-01 drifting in space" role="img">
+    <div class="ring" id="ring"></div>
+    <canvas id="view"></canvas>
+    <svg class="port-hud" id="port-hud" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+    <div class="glare"></div>
+  </div>
+
+  <div class="right">
+    <section class="panel" aria-hidden="true"><h2>TELEMETRY <span class="blink">●</span></h2><ol id="feed"></ol></section>
+    <section class="panel gauge-p" aria-hidden="true"><h2>CYCLE</h2><canvas id="gauge"></canvas></section>
+  </div>
+
+  <div class="bottom">
+    <section class="panel map-p" aria-hidden="true"><h2>LANDING SITE // SWAMP-04</h2><canvas id="map"></canvas></section>
+    <section class="panel" aria-label="Transmission"><h2>TRANSMISSION</h2><canvas id="spectrum" aria-hidden="true"></canvas><p class="soon"><span class="blink">●</span> SOON<small>FIRST SIGNAL INCOMING</small></p></section>
+    <a class="mail" href="mailto:mail@ivolopes.com">MAIL@IVOLOPES.COM</a>
+  </div>
+</div>
+
+<svg class="frame" id="frame" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg>
+<div class="reticle" id="reticle" aria-hidden="true"><span id="coords"></span></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+
+<script src="https://moss.ivolopes.com/specimen.js"></script>
+<script src="https://moss.ivolopes.com/hud.js"></script>
+<script>
+(function () {
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const phone = () => innerWidth <= 860;
+
+  /* ---------- Canopy frame: an outer plate with a bulging window cut out ---------- */
+  function drawFrame() {
+    const f = document.getElementById("frame");
+    if (phone()) { f.innerHTML = ""; return; }
+    const ix = 22, iy = 30, b = 26; // inset and bulge, in viewBox units
+    const win = `M${ix},${iy} Q500,${iy - b} ${1000 - ix},${iy} Q${1000 - ix + b * .6},500 ${1000 - ix},${1000 - iy} Q500,${1000 - iy + b} ${ix},${1000 - iy} Q${ix - b * .6},500 ${ix},${iy} Z`;
+    f.innerHTML = `
+      <defs>
+        <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22252c"/><stop offset=".5" stop-color="#0d0e12"/><stop offset="1" stop-color="#1b1d23"/></linearGradient>
+      </defs>
+      <path d="M0,0H1000V1000H0Z ${win}" fill="url(#steel)" fill-rule="evenodd"/>
+      <path d="${win}" fill="none" stroke="rgba(156,245,154,.35)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
+      <path d="${win}" fill="none" stroke="rgba(0,0,0,.9)" stroke-width="10" vector-effect="non-scaling-stroke" opacity=".6"/>
+      ${[[ix + 8, iy + 8], [1000 - ix - 8, iy + 8], [ix + 8, 1000 - iy - 8], [1000 - ix - 8, 1000 - iy - 8]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="#5c6270" vector-effect="non-scaling-stroke"/>`).join("")}
+      <path d="M380,${1000 - iy + b * .35} L620,${1000 - iy + b * .35}" stroke="#b78cff" stroke-width="2" vector-effect="non-scaling-stroke" opacity=".7"/>`;
+  }
+
+  /* ---------- Porthole ring bolts and the HUD on its glass ---------- */
+  const ring = document.getElementById("ring");
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2, el = document.createElement("i");
+    el.className = "bolt";
+    el.style.left = `${50 + Math.cos(a) * 46.8}%`; el.style.top = `${50 + Math.sin(a) * 46.8}%`;
+    ring.appendChild(el);
+  }
+  const ticks = [];
+  for (let i = 0; i < 120; i++) {
+    const a = (i / 120) * Math.PI * 2, long = i % 10 === 0, r0 = long ? 90 : 94;
+    ticks.push(`<line x1="${(Math.cos(a) * r0).toFixed(2)}" y1="${(Math.sin(a) * r0).toFixed(2)}" x2="${(Math.cos(a) * 98).toFixed(2)}" y2="${(Math.sin(a) * 98).toFixed(2)}" stroke="rgba(156,245,154,${long ? .7 : .3})" stroke-width="${long ? .5 : .3}"/>`);
+  }
+  const labels = [0, 90, 180, 270].map((d) => {
+    const a = ((d - 90) * Math.PI) / 180;
+    return `<text x="${(Math.cos(a) * 84).toFixed(1)}" y="${(Math.sin(a) * 84 + 2).toFixed(1)}" fill="rgba(156,245,154,.75)" font-family="VT323" font-size="6" text-anchor="middle">${String(d).padStart(3, "0")}</text>`;
+  }).join("");
+  document.getElementById("port-hud").innerHTML = `
+    <g class="spin">${ticks.join("")}${labels}</g>
+    <circle r="62" fill="none" stroke="rgba(183,140,255,.35)" stroke-width=".35" stroke-dasharray="1.5 3"/>
+    <path d="M-12,0H-4M4,0H12M0,-12V-4M0,4V12" stroke="rgba(156,245,154,.6)" stroke-width=".4"/>
+    <path d="M-48,-48h8M-48,-48v8M48,-48h-8M48,-48v8M-48,48h8M-48,48v-8M48,48h-8M48,48v-8" stroke="rgba(156,245,154,.55)" stroke-width=".5" fill="none"/>
+    <text x="-46" y="-52" fill="rgba(156,245,154,.8)" font-family="VT323" font-size="5.5">MOSS-01 · LOCKED</text>
+    <text x="46" y="57" fill="rgba(183,140,255,.85)" font-family="VT323" font-size="5.5" text-anchor="end">RANGE 0.42 AU</text>`;
+
+  /* ---------- The view through the porthole: WebGL, with a fisheye lens ---------- */
+  const view = document.getElementById("view"), spec = document.getElementById("specimen");
+  const gl = view.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: false });
+  if (!gl) return;
+  const VS = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }";
+  const FS = `precision highp float;
+    uniform sampler2D uSpec; uniform float uTime; uniform vec4 uMap; varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+      return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+    float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= .5; } return s; }
+    float star(vec2 s, float scale, float t){ vec2 g = s * scale, id = floor(g), f = fract(g) - .5; float h = hash(id);
+      vec2 o = vec2(hash(id + 3.1), hash(id + 7.7)) - .5; float d = length(f - o * .7);
+      return step(.93, h) * (.6 + .4 * sin(t * 2. + h * 50.)) * smoothstep(.07, 0., d) * (h - .9) * 14.; }
+    vec4 specimen(vec2 s){ vec2 u = uMap.xy + vec2(s.x * uMap.z, -s.y * uMap.w);
+      if (u.x < 0. || u.x > 1. || u.y < 0. || u.y > 1.) return vec4(0.); return texture2D(uSpec, u); }
+    void main(){
+      vec2 p = vUv * 2. - 1.; float r = length(p);
+      if (r > 1.) { gl_FragColor = vec4(0.); return; }
+      // Fisheye: the edge of the glass squeezes in far more of the sky than the centre.
+      float k = .62;
+      vec2 s = p * (1. + k * r * r);
+      float t = uTime;
+      vec2 q = s * 1.05 + vec2(t * .010, t * .004);
+      float n = fbm(q * 1.5), m = fbm(q * 3. + n * 1.6 + 3.);
+      vec3 col = vec3(.006, .004, .016);
+      col += vec3(.24, .05, .36) * smoothstep(.38, .86, n) * 1.15;
+      col += vec3(.03, .28, .27) * smoothstep(.45, .92, m) * .85;
+      col += vec3(.30, .70, .25) * pow(smoothstep(.5, .95, n * m * 1.9), 2.) * .55;
+      col += vec3(.85, .92, 1.) * (star(s + vec2(t * .006, 0.), 34., t) + star(s + vec2(t * .012, 0.), 80., t * 1.3) * .6 + star(s + vec2(t * .02, 0.), 150., t) * .35);
+      // A ringed ice giant below the specimen.
+      vec2 pc = s - vec2(.95, -1.1); float pr = length(pc), R = .82;
+      if (pr < R) {
+        vec3 nn = normalize(vec3(pc, sqrt(max(0., R * R - pr * pr))));
+        float band = sin(pc.y / R * 16. + fbm(pc * 5.) * 2.5) * .5 + .5;
+        vec3 pcol = mix(vec3(.10, .24, .30), vec3(.34, .20, .46), band);
+        col = pcol * (.05 + 1.2 * clamp(dot(nn, normalize(vec3(-.65, .55, .5))), 0., 1.));
+      }
+      col += vec3(.35, 1., .65) * exp(-abs(pr - R) * 45.) * .45;
+      float ringd = abs(length(pc * vec2(1., 3.6)) - 1.25);
+      if (pr > R || pc.y < -.05) col += vec3(.6, .5, .9) * smoothstep(.06, 0., ringd) * .25;
+      // The specimen, with a touch of colour fringing towards the edge.
+      float ca = .012 * r * r;
+      vec4 sg = specimen(s);
+      vec3 sp = vec3(specimen(s * (1. + ca)).r, sg.g, specimen(s * (1. - ca)).b);
+      col = mix(col, sp, sg.a);
+      // Lens: darker towards the rim, a faint green cast from the glass.
+      col *= 1. - .55 * pow(r, 3.);
+      col += vec3(.02, .05, .03) * r;
+      gl_FragColor = vec4(col, smoothstep(1., .985, r));
+    }`;
+  const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+  const uTime = gl.getUniformLocation(prog, "uTime"), uMap = gl.getUniformLocation(prog, "uMap");
+
+  function size() {
+    const pr = Math.min(devicePixelRatio || 1, 1.5);
+    view.width = Math.round(view.clientWidth * pr); view.height = Math.round(view.clientHeight * pr);
+    gl.viewport(0, 0, view.width, view.height);
+    // Where specimen.js draws its bloom (same maths as its setup()).
+    const W = innerWidth, H = innerHeight, ph = W < 860;
+    const cx = W / 2, cy = ph ? H * 0.53 : H * 0.47, R = Math.min(W * (ph ? 0.4 : 0.26), H * (ph ? 0.21 : 0.29));
+    const span = R / 0.62; // the bloom fills about 62% of the glass radius before the lens
+    gl.uniform4f(uMap, cx / W, cy / H, span / W, span / H);
+    drawFrame();
+  }
+  addEventListener("resize", size); size();
+  const t0 = performance.now();
+  function frame(now) {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, spec);
+    gl.uniform1f(uTime, still ? 20 : (now - t0) / 1000);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (!still) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if (still) setTimeout(() => requestAnimationFrame(frame), 300);
+})();
+</script>
+</body>
+</html>

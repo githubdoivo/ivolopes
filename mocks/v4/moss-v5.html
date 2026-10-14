@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>MOSS · signal acquired</title>
+<meta name="description" content="MOSS, DJ and producer. Transmission soon.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  /* Layers edited out of the mock itself: the plate (space, planet, asteroids,
+     the fish-eye glass) and the bloom. Everything else is live: the HUD, the
+     waveform, the reticle and the motion. All positions are fractions of the
+     plate, so the HUD stays locked to it at any screen size. */
+  :root { --g: #c8f8bb; --glow: 0 0 1px rgba(210, 255, 200, .9), 0 0 6px rgba(130, 255, 140, .7), 0 0 16px rgba(100, 255, 130, .4), 0 0 32px rgba(90, 255, 120, .18); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { color: var(--g); font-family: "Share Tech Mono", ui-monospace, monospace; -webkit-font-smoothing: antialiased; }
+  @media (pointer: fine) { html, body, a { cursor: none; } }
+  a { color: inherit; text-decoration: none; }
+
+  .stage { position: fixed; left: 50%; top: 50%; --h: 900px; }
+  .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; animation: drift 40s ease-in-out infinite alternate; }
+  @keyframes drift { from { transform: scale(1.01) translate(.15%, .1%); } to { transform: scale(1.035) translate(-.25%, -.2%); } }
+
+  /* The bloom: floats, sways, breathes; a green scan passes over it. */
+  .bloom { position: absolute; transform: translate(-50%, -50%); animation: float 11s ease-in-out infinite; will-change: transform; }
+  .bloom img, .bloom .scan-b { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bloom img { animation: sway 17s ease-in-out infinite; filter: drop-shadow(0 0 calc(var(--h) * .03) rgba(0, 0, 0, .55)); }
+  .scan-b { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; animation: sway 17s ease-in-out infinite;
+    background: linear-gradient(180deg, transparent 0 40%, rgba(150, 255, 170, .0) 44%, rgba(150, 255, 170, .22) 50%, rgba(150, 255, 170, 0) 56%, transparent 60%) 0 0 / 100% 300%;
+    animation: sway 17s ease-in-out infinite, scanb 7s linear infinite; }
+  @keyframes float { 0%, 100% { margin-top: 0; } 50% { margin-top: calc(var(--h) * -.012); } }
+  @keyframes sway { 0%, 100% { transform: rotate(-2.2deg) scale(1); } 50% { transform: rotate(2.2deg) scale(1.018); } }
+  @keyframes scanb { from { background-position: 0 100%; } to { background-position: 0 -50%; } }
+
+  /* HUD */
+  .hud { position: absolute; inset: 0; pointer-events: none; text-shadow: var(--glow); }
+  .hud a { pointer-events: auto; }
+  .t { position: absolute; white-space: nowrap; text-transform: uppercase; letter-spacing: .12em; line-height: 1.38; font-size: calc(var(--h) * .0165); }
+  .t.r { text-align: right; }
+  .t.c { text-align: center; transform: translateX(-50%); }
+  .dim { opacity: .82; }
+  .word { font-size: calc(var(--h) * .07); letter-spacing: .6em; line-height: 1; text-shadow: 0 0 2px rgba(220, 255, 210, .95), 0 0 10px rgba(130, 255, 140, .8), 0 0 26px rgba(100, 255, 130, .5), 0 0 60px rgba(90, 255, 120, .25); }
+  .role { font-size: calc(var(--h) * .022); letter-spacing: .52em; }
+  .tx { font-size: calc(var(--h) * .021); letter-spacing: .18em; }
+  .mail { font-size: calc(var(--h) * .017); letter-spacing: .1em; pointer-events: auto; }
+  .mail:hover { color: #fff; }
+  .mail:focus-visible { outline: 1px solid var(--g); outline-offset: 6px; }
+  .tri { display: inline-block; width: 0; height: 0; margin-right: .9em; vertical-align: .05em; border-left: .62em solid currentColor; border-top: .4em solid transparent; border-bottom: .4em solid transparent; opacity: .9; filter: drop-shadow(0 0 4px rgba(130, 255, 140, .7)); }
+  .bracket { position: absolute; font-size: calc(var(--h) * .0145); line-height: 1.38; letter-spacing: .12em; padding-left: 1em; }
+  .bracket::before { content: ""; position: absolute; left: 0; top: .1em; bottom: .1em; width: .45em; border: 1px solid currentColor; border-right: 0; opacity: .8; }
+  .bracket.r { padding: 0 1em 0 0; text-align: right; }
+  .bracket.r::before { left: auto; right: 0; border: 1px solid currentColor; border-left: 0; }
+  .blink { animation: blink 1.6s steps(1) infinite; }
+  @keyframes blink { 60% { opacity: .35; } }
+  svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 3px rgba(130, 255, 140, .55)); }
+  canvas.wave { position: absolute; }
+  .meter { position: absolute; display: flex; align-items: center; gap: calc(var(--h) * .0018); }
+  .meter i { width: calc(var(--h) * .0032); height: calc(var(--h) * .009); background: var(--g); box-shadow: 0 0 4px rgba(130, 255, 140, .7); }
+  .meter i.off { opacity: .2; box-shadow: none; }
+  .meter s { flex: 1; height: 1px; background: rgba(200, 248, 187, .35); margin-left: calc(var(--h) * .006); }
+  .meter b { width: 1px; height: calc(var(--h) * .012); background: rgba(200, 248, 187, .7); }
+
+  /* Glass, grain, scanlines, signal flicker */
+  .shine { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: screen; overflow: hidden; }
+  .shine::before { content: ""; position: absolute; top: -50%; bottom: -50%; width: 18%; left: -30%; transform: rotate(18deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 240, 220, .05), rgba(255, 255, 255, .09), rgba(255, 240, 220, .05), transparent); animation: shine 13s ease-in-out infinite; }
+  @keyframes shine { 0%, 55% { left: -30%; } 100% { left: 130%; } }
+  .grain { position: fixed; inset: -50%; pointer-events: none; opacity: .08; mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grain 1s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0, 0); } 33% { transform: translate(-3%, 2%); } 66% { transform: translate(2%, -3%); } }
+  .scanl { position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px); }
+  .flicker { position: fixed; inset: 0; pointer-events: none; background: #000; opacity: 0; }
+
+  /* The tech reticle cursor; it locks onto the bloom. */
+  .reticle { position: fixed; left: 0; top: 0; width: 54px; height: 54px; pointer-events: none; opacity: 0; transition: opacity .3s; will-change: transform; z-index: 5; }
+  .reticle.on { opacity: 1; }
+  .reticle i { position: absolute; width: 10px; height: 10px; border: 1px solid rgba(200, 248, 187, .85); filter: drop-shadow(0 0 3px rgba(130, 255, 140, .8)); }
+  .reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; } .reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+  .reticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; } .reticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+  .reticle b { position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; }
+  .reticle b::before, .reticle b::after { content: ""; position: absolute; background: rgba(200, 248, 187, .9); }
+  .reticle b::before { left: 4px; top: 0; width: 1px; height: 9px; } .reticle b::after { top: 4px; left: 0; height: 1px; width: 9px; }
+  .reticle span { position: absolute; left: calc(100% + 10px); top: -2px; white-space: nowrap; font-size: 12px; letter-spacing: .12em; color: var(--g); text-shadow: var(--glow); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (prefers-reduced-motion: reduce) { .plate, .bloom, .bloom img, .scan-b, .shine::before, .grain, .blink { animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="sr"><h1>MOSS</h1><p>DJ and producer. Transmission soon. Contact: mail@ivolopes.com</p></main>
+
+<div class="stage" id="stage">
+  <img class="plate" id="plate" alt="" aria-hidden="true">
+  <div class="bloom" id="bloom" aria-hidden="true"><img id="flower" alt=""><div class="scan-b" id="scanb"></div></div>
+  <div class="hud" id="hud"></div>
+</div>
+<div class="shine"></div>
+<div class="grain"></div>
+<div class="scanl"></div>
+<div class="flicker" id="flicker"></div>
+<div class="reticle" id="reticle" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b><span id="coords"></span></div>
+
+<script>
+(function () {
+  // Positions are fractions of the plate (x of its width, y of its height).
+  const LAYOUT = {
+    desk: {
+      plate: "assets/v5-plate-desk.jpg", flower: "assets/v5-flower-desk.png", w: 1672, h: 941,
+      bloom: { x: .53, y: .47, size: .84 },            // size: fraction of plate height
+      ring: { r: .335 },
+      hud: [
+        ["t", .085, .105, `<div><span class="dim">LAT&nbsp;&nbsp;</span><b id="lat">23.9°</b></div><div><span class="dim">LON&nbsp;&nbsp;</span><b id="lon">146.7°</b></div><div><span class="dim">DIST&nbsp;</span>1.8 AU</div>`],
+        ["t r", .914, .105, `<div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div>`],
+        ["t word", .069, .372, "MOSS"],
+        ["t role", .071, .455, "DJ · PRODUCER"],
+        ["t tx", .071, .525, `TRANSMISSION · <span class="blink">SOON</span>`],
+        ["mail t", .052, .615, `<span class="tri"></span>MAIL@IVOLOPES.COM`, "mailto:mail@ivolopes.com"],
+        ["t", .737, .248, "BLOOM 01 · CERAMIC<br>SPECIMEN A<br>ORIGIN UNKNOWN", null, "c1"],
+        ["t", .8, .641, "MOSS · COVERAGE 100%<br>SYMBIOTIC GROWTH<br>STABLE", null, "c2"],
+        ["bracket", .072, .838, "AUDIO<br>LIVE FEED<br>STABLE"],
+        ["bracket r", .924, .838, "SPECIMEN<br>BIOSCAN<br>V.1.0"],
+        ["t", .667, .867, "|&nbsp;&nbsp;124 BPM"],
+      ],
+      meter: [.071, .568, .13],
+      wave: [.235, .881, .425, .07],
+      plus: [[.067, .148], [.09, .207], [.933, .148], [.95, .513]],
+      ruler: [.953, .278, .556],
+      calls: [[.16, -.12, .728, .262, .735], [.2, .15, .79, .655, .797]],   // anchor on bloom (frac of its size), elbow x,y, end x
+    },
+    phone: {
+      plate: "assets/v5-plate-phone.jpg", flower: "assets/v5-flower-phone.png", w: 852, h: 1846,
+      bloom: { x: .5, y: .4, size: .43 },
+      ring: { r: .2 },
+      hud: [
+        ["t", .12, .085, `<div><span class="dim">LAT&nbsp;&nbsp;</span><b id="lat">23.9°</b></div><div><span class="dim">LON&nbsp;&nbsp;</span><b id="lon">146.7°</b></div><div><span class="dim">DIST&nbsp;</span>1.8 AU</div>`],
+        ["t r", .88, .085, `<div>FIELD 28 mm</div><div>F / 1.4</div><div>ISO 800</div>`],
+        ["t c word", .5, .665, "MOSS"],
+        ["t c role", .5, .728, "DJ · PRODUCER"],
+        ["t c tx", .5, .778, `TRANSMISSION · <span class="blink">SOON</span>`],
+        ["t", .64, .854, "|&nbsp;&nbsp;124 BPM"],
+        ["mail t c", .5, .925, "MAIL@IVOLOPES.COM", "mailto:mail@ivolopes.com"],
+      ],
+      meter: [.28, .808, .44],
+      wave: [.2, .862, .42, .04],
+      plus: [[.14, .07], [.86, .07], [.08, .15], [.92, .15]],
+      calls: [],
+      font: { t: .0115, word: .046, role: .0145, tx: .0145, mail: .012 },
+    },
+  };
+  const $ = (id) => document.getElementById(id);
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const q = new URLSearchParams(location.search);
+  const frozen = q.has("t") ? +q.get("t") : null;
+  let L = null, S = 1, SW = 0, SH = 0;
+
+  function build() {
+    const want = innerWidth / innerHeight < .8 ? LAYOUT.phone : LAYOUT.desk;
+    const stage = $("stage");
+    S = Math.max(innerWidth / want.w, innerHeight / want.h);
+    SW = want.w * S; SH = want.h * S;
+    Object.assign(stage.style, { width: `${SW}px`, height: `${SH}px`, marginLeft: `${-SW / 2}px`, marginTop: `${-SH / 2}px` });
+    stage.style.setProperty("--h", `${SH}px`);
+    if (want === L) return place();
+    L = want;
+    $("plate").src = L.plate; $("flower").src = L.flower;
+    const mask = `url(${L.flower})`; Object.assign($("scanb").style, { webkitMaskImage: mask, maskImage: mask });
+    const hud = $("hud");
+    hud.innerHTML = `<svg class="lines" id="lines"></svg><canvas class="wave" id="wave"></canvas><div class="meter" id="meter"></div>` +
+      L.hud.map(([cls, x, y, html, href, id]) => {
+        const tag = href ? "a" : "div";
+        const style = cls.split(" ").includes("r") ? `right:${(1 - x) * 100}%;top:${y * 100}%` : `left:${x * 100}%;top:${y * 100}%`;
+        return `<${tag} class="${cls}" style="${style}"${href ? ` href="${href}"` : ` aria-hidden="true"`}${id ? ` id="${id}"` : ""}>${html}</${tag}>`;
+      }).join("");
+    if (L.font) {
+      const f = L.font;
+      hud.querySelectorAll(".t").forEach((el) => { el.style.fontSize = `calc(var(--h) * ${el.classList.contains("word") ? f.word : el.classList.contains("role") ? f.role : el.classList.contains("tx") ? f.tx : el.classList.contains("mail") ? f.mail : f.t})`; });
+    }
+    $("meter").innerHTML = Array.from({ length: 22 }, (_, i) => `<i class="${i > 13 ? "off" : ""}"></i>`).join("") + "<s></s><b></b>";
+    place();
+  }
+  function place() {
+    const b = L.bloom, size = b.size * SH;
+    Object.assign($("bloom").style, { left: `${b.x * SW}px`, top: `${b.y * SH}px`, width: `${size}px`, height: `${size}px` });
+    const [mx, my, mw] = L.meter;
+    Object.assign($("meter").style, { left: `${mx * SW}px`, top: `${my * SH}px`, width: `${mw * SW}px` });
+    const [wx, wy, ww, wh] = L.wave, wave = $("wave"), pr = Math.min(devicePixelRatio || 1, 2);
+    wave.width = ww * SW * pr; wave.height = wh * SH * pr;
+    Object.assign(wave.style, { left: `${wx * SW}px`, top: `${(wy - wh / 2) * SH}px`, width: `${ww * SW}px`, height: `${wh * SH}px` });
+  }
+  addEventListener("resize", build);
+  build();
+
+  /* ---------- Lines that follow the bloom ---------- */
+  function bloomBox() {
+    const r = $("bloom").getBoundingClientRect(), s = $("stage").getBoundingClientRect();
+    return { x: r.left - s.left + r.width / 2, y: r.top - s.top + r.height / 2, size: r.width };
+  }
+  function lines(t) {
+    const B = bloomBox(), G = (a) => `rgba(200,248,187,${a})`;
+    const R = L.ring.r * SH;
+    let h = `<circle cx="${B.x}" cy="${B.y}" r="${R}" fill="none" stroke="${G(.5)}" stroke-width="1" stroke-dasharray="1.2 6"/>`;
+    // the ring's scanning arc
+    const a0 = t * .35, a1 = a0 + .9;
+    h += `<path d="M${B.x + Math.cos(a0) * R},${B.y + Math.sin(a0) * R} A${R},${R} 0 0 1 ${B.x + Math.cos(a1) * R},${B.y + Math.sin(a1) * R}" fill="none" stroke="${G(.75)}" stroke-width="1.2"/>`;
+    h += `<path d="M${B.x - 7},${B.y - R - 15} L${B.x + 7},${B.y - R - 15} L${B.x},${B.y - R - 4} Z" fill="none" stroke="${G(.85)}"/>`;
+    h += `<path d="M${B.x - 4},${B.y + R + 13} L${B.x + 4},${B.y + R + 13} L${B.x},${B.y + R + 5} Z" fill="${G(.8)}"/>`;
+    for (const k of [0, .5, 1, 1.5]) { const a = k * Math.PI; h += `<line x1="${B.x + Math.cos(a) * (R - 5)}" y1="${B.y + Math.sin(a) * (R - 5)}" x2="${B.x + Math.cos(a) * (R + 5)}" y2="${B.y + Math.sin(a) * (R + 5)}" stroke="${G(.7)}"/>`; }
+    for (const [x, y] of L.plus) { const px = x * SW, py = y * SH, s = SH * .011; h += `<path d="M${px - s},${py} H${px + s} M${px},${py - s} V${py + s}" stroke="${G(.75)}"/>`; }
+    if (L.ruler) {
+      const [rx, top, bot] = L.ruler, X = rx * SW, T = top * SH, Bt = bot * SH;
+      h += `<line x1="${X}" y1="${T}" x2="${X}" y2="${Bt}" stroke="${G(.55)}"/>`;
+      for (let i = 0; i <= 10; i++) { const y = T + (i / 10) * (Bt - T), long = i % 5 === 0; h += `<line x1="${X - (long ? SH * .014 : SH * .007)}" y1="${y}" x2="${X}" y2="${y}" stroke="${G(long ? .8 : .5)}"/>`; }
+    }
+    for (const [ax, ay, ex, ey, endx] of L.calls) {
+      const px = B.x + ax * B.size, py = B.y + ay * B.size;
+      h += `<polyline points="${px},${py} ${ex * SW},${ey * SH} ${endx * SW},${ey * SH}" fill="none" stroke="${G(.7)}"/><circle cx="${px}" cy="${py}" r="2" fill="${G(.95)}"/>`;
+    }
+    $("lines").innerHTML = h;
+  }
+
+  /* ---------- Waveform at 124 BPM ---------- */
+  function wave(t) {
+    const c = $("wave"), g = c.getContext("2d"), w = c.width, h = c.height, mid = h / 2, pr = Math.min(devicePixelRatio || 1, 2);
+    g.clearRect(0, 0, w, h);
+    const beat = Math.pow(1 - (((t * 124) / 60) % 1), 3);
+    g.strokeStyle = "rgba(205,250,190,.95)"; g.lineWidth = pr; g.shadowColor = "rgba(120,255,140,.9)"; g.shadowBlur = 6 * pr;
+    g.beginPath();
+    for (let x = 0; x < w; x += 3 * pr) {
+      const u = x / w, env = Math.pow(Math.sin(u * Math.PI), .7) * (.35 + .65 * Math.pow(Math.abs(Math.sin(u * 7.3 + 1.1)), 1.5));
+      const n = Math.abs(Math.sin(u * 311 + t * 7) * Math.sin(u * 53 - t * 3.1) * Math.sin(u * 17 + t * .7));
+      const a = (env * n * (.35 + beat * .65) + .03) * mid * .95;
+      g.moveTo(x, mid - a); g.lineTo(x, mid + a);
+    }
+    g.stroke();
+    g.shadowBlur = 0; g.fillStyle = "rgba(205,250,190,.55)";
+    for (let x = 0; x < w; x += 5 * pr) g.fillRect(x, mid - pr / 2, pr, pr);
+  }
+
+  /* ---------- Reticle cursor: follows the mouse, locks onto the bloom ---------- */
+  const ret = $("reticle"), coords = $("coords");
+  const mouse = { x: -100, y: -100, on: false }, cur = { x: -100, y: -100, s: 54, lock: 0 };
+  addEventListener("pointermove", (e) => { if (e.pointerType !== "mouse") return; mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true; ret.classList.add("on"); });
+  document.addEventListener("pointerleave", () => { mouse.on = false; ret.classList.remove("on"); });
+  function reticle() {
+    if (!mouse.on) return;
+    const r = $("bloom").getBoundingClientRect(), bx = r.left + r.width / 2, by = r.top + r.height / 2, br = r.width * .32;
+    const near = Math.hypot(mouse.x - bx, mouse.y - by) < br;
+    cur.lock += ((near ? 1 : 0) - cur.lock) * .12;
+    const tx = mouse.x + (bx - mouse.x) * cur.lock, ty = mouse.y + (by - mouse.y) * cur.lock, ts = 54 + (br * 2 - 54) * cur.lock;
+    cur.x += (tx - cur.x) * .35; cur.y += (ty - cur.y) * .35; cur.s += (ts - cur.s) * .25;
+    ret.style.width = ret.style.height = `${cur.s}px`;
+    ret.style.transform = `translate(${cur.x - cur.s / 2}px, ${cur.y - cur.s / 2}px)`;
+    coords.textContent = cur.lock > .6 ? "TARGET LOCKED · MOSS-01" : `${(23.9 + (mouse.y / innerHeight - .5) * -.4).toFixed(2)}°  ${(146.7 + (mouse.x / innerWidth - .5) * .6).toFixed(2)}°`;
+  }
+
+  /* ---------- Loop ---------- */
+  const t0 = performance.now();
+  (function frame(now) {
+    const t = frozen ?? (now - t0) / 1000;
+    lines(t); wave(t); reticle();
+    const lat = $("lat"), lon = $("lon");
+    if (lat) lat.textContent = `${(23.9 + Math.sin(t * .07) * .2).toFixed(1)}°`;
+    if (lon) lon.textContent = `${(146.7 + t * .002).toFixed(1)}°`;
+    document.body.dataset.ready = "1";
+    if (!still || frozen != null) requestAnimationFrame(frame);
+  })(performance.now());
+
+  // Now and then, a faint signal flicker.
+  if (!still) (function flick() {
+    setTimeout(() => { $("flicker").animate([{ opacity: 0 }, { opacity: .16 }, { opacity: 0 }, { opacity: .08 }, { opacity: 0 }], { duration: 240 }); flick(); }, 6000 + Math.random() * 9000);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -54,12 +54,12 @@
   .dim { opacity: .8; }
   /* The wordmark is drawn as thin pixel-LCD lettering (SVG), like the mock. */
   .word { opacity: 1; line-height: 0; }
-  .word svg { display: block; height: calc(var(--h) * .054); width: auto; overflow: visible;
+  .word svg { display: block; height: calc(var(--h) * .058); width: auto; overflow: visible;
     filter: drop-shadow(0 0 .6px #9dff9f) drop-shadow(0 0 3px rgba(80, 255, 110, .95)) drop-shadow(0 0 10px rgba(60, 255, 100, .6)) drop-shadow(0 0 28px rgba(60, 255, 100, .32));
     animation: lcd 5s ease-in-out infinite; }
   @keyframes lcd { 0%, 100% { opacity: 1; } 47% { opacity: .93; } 48% { opacity: 1; } 49% { opacity: .9; } 50% { opacity: 1; } }
   .t.c.word svg { margin: 0 auto; }
-  @media (max-aspect-ratio: 4/5) { .word svg { height: calc(var(--h) * .036); } }
+  @media (max-aspect-ratio: 4/5) { .word svg { height: calc(var(--h) * .039); } }
   .role { font-size: calc(var(--h) * .021); letter-spacing: .55em; color: var(--g2); opacity: .9; }
   .tx { font-size: calc(var(--h) * .02); letter-spacing: .2em; color: var(--g2); opacity: .92; }
   .mail { font-size: calc(var(--h) * .016); letter-spacing: .16em; color: var(--g); opacity: .9; pointer-events: auto; }
@@ -196,10 +196,10 @@
         const X = i * adv + x;
         // Solid cells: straight strokes read as one line, diagonals step pixel by pixel.
         // One path for all cells (no seams between them at small sizes).
-        rects += `M${X} ${y}h1v1h-1z`;
+        rects += `M${X - .22} ${y - .22}h1.44v1.44h-1.44z`;
         // A pale core runs down the middle of every stroke.
-        cores += `M${X + .3} ${y + .3}h${on(x + 1, y) ? 1.4 : .4}v.4h-${on(x + 1, y) ? 1.4 : .4}z`;
-        if (on(x, y + 1)) cores += `M${X + .3} ${y + .3}h.4v1.4h-.4z`;
+        cores += `M${X + .22} ${y + .22}h${on(x + 1, y) ? 1.56 : .56}v.56h-${on(x + 1, y) ? 1.56 : .56}z`;
+        if (on(x, y + 1)) cores += `M${X + .22} ${y + .22}h.56v1.56h-.56z`;
       }));
     });
     const w = adv * (word.length - 1) + 11;

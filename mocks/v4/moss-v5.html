@@ -18,9 +18,9 @@
   /* Typography spec (from the mock): Rajdhani wordmark, Share Tech Mono HUD,
      a restrained phosphor glow, and a colour hierarchy from bright to dim. */
   :root {
-    --g: #a6f7a0; --g2: #b9f3b0; --tel: #bdf3b4; --dim: #86b98a; --line: #9be3a2;
+    --g: #a9ffa2; --g2: #bcffb2; --tel: #c4fbb9; --dim: #86b98a; --line: #9be3a2;
     --glow-word: 0 0 2px rgba(190, 255, 180, .9), 0 0 9px rgba(110, 255, 130, .6), 0 0 22px rgba(90, 255, 120, .3);
-    --glow: 0 0 1px rgba(200, 255, 190, .8), 0 0 6px rgba(110, 255, 130, .5), 0 0 14px rgba(90, 255, 120, .22);
+    --glow: 0 0 1px rgba(200, 255, 190, .85), 0 0 6px rgba(80, 255, 110, .6), 0 0 14px rgba(60, 255, 100, .28);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; }
@@ -29,7 +29,7 @@
   a { color: inherit; text-decoration: none; }
 
   .stage { position: fixed; left: 50%; top: 50%; }
-  .view { position: fixed; inset: 0; --h: 100vh; }
+  .view { position: fixed; inset: 0; --h: 100vh; z-index: 2; }   /* above grain and scanlines: the HUD is projected on the glass */
   .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; animation: drift 40s ease-in-out infinite alternate; }
   @keyframes drift { from { transform: scale(1.01) translate(.15%, .1%); } to { transform: scale(1.035) translate(-.25%, -.2%); } }
 
@@ -54,8 +54,10 @@
   .dim { opacity: .8; }
   /* The wordmark is drawn as thin pixel-LCD lettering (SVG), like the mock. */
   .word { opacity: 1; line-height: 0; }
-  .word svg { display: block; height: calc(var(--h) * .052); width: auto; overflow: visible;
-    filter: drop-shadow(0 0 1.5px rgba(200, 255, 190, .95)) drop-shadow(0 0 7px rgba(110, 255, 130, .65)) drop-shadow(0 0 18px rgba(90, 255, 120, .3)); }
+  .word svg { display: block; height: calc(var(--h) * .054); width: auto; overflow: visible;
+    filter: drop-shadow(0 0 .6px #9dff9f) drop-shadow(0 0 3px rgba(80, 255, 110, .95)) drop-shadow(0 0 10px rgba(60, 255, 100, .6)) drop-shadow(0 0 28px rgba(60, 255, 100, .32));
+    animation: lcd 5s ease-in-out infinite; }
+  @keyframes lcd { 0%, 100% { opacity: 1; } 47% { opacity: .93; } 48% { opacity: 1; } 49% { opacity: .9; } 50% { opacity: 1; } }
   .t.c.word svg { margin: 0 auto; }
   @media (max-aspect-ratio: 4/5) { .word svg { height: calc(var(--h) * .036); } }
   .role { font-size: calc(var(--h) * .021); letter-spacing: .55em; color: var(--g2); opacity: .9; }
@@ -93,7 +95,7 @@
   .flicker { position: fixed; inset: 0; pointer-events: none; background: #000; opacity: 0; }
 
   /* The tech reticle cursor; it locks onto the bloom. */
-  .reticle { position: fixed; left: 0; top: 0; width: 54px; height: 54px; pointer-events: none; opacity: 0; transition: opacity .3s; will-change: transform; z-index: 5; }
+  .reticle { position: fixed; z-index: 6; left: 0; top: 0; width: 54px; height: 54px; pointer-events: none; opacity: 0; transition: opacity .3s; will-change: transform; z-index: 5; }
   .reticle.on { opacity: 1; }
   .reticle i { position: absolute; width: 10px; height: 10px; border: 1px solid rgba(145, 216, 154, .85); filter: drop-shadow(0 0 3px rgba(130, 255, 140, .8)); }
   .reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; } .reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
@@ -171,19 +173,39 @@
       font: { t: .0112, word: .052, role: .0135, tx: .0138, mail: .0115 },
     },
   };
-  // M O S S as thin pixel-LCD letters: 6 x 10 units each, chamfered corners, LCD lines.
-  const GLYPH = {
-    M: "M0.5,10 V1.5 L1.5,0.5 L3,4.5 L4.5,0.5 L5.5,1.5 V10",
-    O: "M1.5,0.5 H4.5 L5.5,1.5 V9 L4.5,10 H1.5 L0.5,9 V1.5 Z",
-    S: "M5.5,2 V1.5 L4.5,0.5 H1.5 L0.5,1.5 V4.2 L1.5,5.2 H4.5 L5.5,6.2 V9 L4.5,10 H1.5 L0.5,9 V8.5",
+  // M O S S as an LCD dot-matrix, copied pixel by pixel from the mock:
+  // 11 x 14 cells per letter, one-cell strokes, notched corners, stepped diagonals.
+  const GLYPHS = {
+    M: [
+      "X.........X", "XX.......XX", "X.X.....X.X", "X..X...X..X", "X...X.X...X", "X....X....X", "X.........X",
+      "X.........X", "X.........X", "X.........X", "X.........X", "X.........X", "X.........X", "X.........X"],
+    O: [
+      ".XXXXXXXX.", "X........X", "X........X", "X........X", "X........X", "X........X", "X........X",
+      "X........X", "X........X", "X........X", "X........X", "X........X", "X........X", ".XXXXXXXX."],
+    S: [
+      ".XXXXXXXX.", "X........X", "X........X", "X.........", "X.........", "X.........", ".XXXXXXXX.",
+      ".........X", ".........X", ".........X", ".........X", "X........X", "X........X", ".XXXXXXXX."],
   };
   const WORDMARK = (() => {
-    const adv = 15.5, letters = [..."MOSS"];
-    const w = adv * (letters.length - 1) + 6;
-    const paths = letters.map((ch, i) => `<path d="${GLYPH[ch]}" transform="translate(${i * adv} 0)"/>`).join("");
-    return `<svg viewBox="-.5 -.3 ${w + 1} 11" role="img" aria-label="MOSS"><defs><pattern id="lcd" width="1" height=".55" patternUnits="userSpaceOnUse"><rect width="1" height=".4" fill="#fff"/></pattern><mask id="lcdm"><rect x="-1" y="-1" width="${w + 3}" height="13" fill="url(#lcd)"/></mask></defs>` +
-      `<g fill="none" stroke="#b4f8ac" stroke-width="1.05" stroke-linejoin="miter" stroke-linecap="square">${paths}</g>` +
-      `<g fill="none" stroke="#eaffe4" stroke-width=".35" stroke-linejoin="miter" mask="url(#lcdm)" opacity=".55">${paths}</g></svg>`;
+    const adv = 27, word = [..."MOSS"];
+    let rects = "", cores = "";
+    word.forEach((ch, i) => {
+      const G = GLYPHS[ch], on = (x, y) => G[y] && G[y][x] === "X";
+      G.forEach((row, y) => [...row].forEach((c, x) => {
+        if (c !== "X") return;
+        const X = i * adv + x;
+        // Solid cells: straight strokes read as one line, diagonals step pixel by pixel.
+        // One path for all cells (no seams between them at small sizes).
+        rects += `M${X} ${y}h1v1h-1z`;
+        // A pale core runs down the middle of every stroke.
+        cores += `M${X + .3} ${y + .3}h${on(x + 1, y) ? 1.4 : .4}v.4h-${on(x + 1, y) ? 1.4 : .4}z`;
+        if (on(x, y + 1)) cores += `M${X + .3} ${y + .3}h.4v1.4h-.4z`;
+      }));
+    });
+    const w = adv * (word.length - 1) + 11;
+    return `<svg viewBox="-.5 -.5 ${w + 1} 15" role="img" aria-label="MOSS" shape-rendering="geometricPrecision">` +
+      `<path fill="#62f070" d="${rects}"/>` +                                // green edge
+      `<path fill="#e6ffe0" d="${cores}"/></svg>`;
   })();
   const $ = (id) => document.getElementById(id);
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -35,6 +35,9 @@
   .wall.cover { z-index: 2; display: none; pointer-events: none; }
   .kiln { position: fixed; z-index: 3; pointer-events: none; border-radius: 50%; opacity: 0;
     background: radial-gradient(closest-side, rgba(255, 140, 60, .55), rgba(240, 110, 40, .22) 55%, transparent); filter: blur(8px); }
+  /* Two layers: a paper-white backing in the pot's exact outline (so the pot is solid),
+     and the drawing multiplied over it like ink (so the shadow soaks into the paper). */
+  .jar-back { position: fixed; z-index: 4; pointer-events: none; }
   .jar { position: fixed; z-index: 4; pointer-events: none; mix-blend-mode: multiply; }
   .jar canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .jar img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; will-change: opacity, filter; }
@@ -109,6 +112,7 @@
 <div class="wall" aria-hidden="true"></div>
 <div class="wall cover" aria-hidden="true"></div>
 <div class="kiln" id="kiln" aria-hidden="true"></div>
+<canvas class="jar-back" id="jar-back" aria-hidden="true"></canvas>
 <div class="jar" id="jar" aria-hidden="true"></div>
 <div class="label" id="label" aria-hidden="true"></div>
 
@@ -240,8 +244,14 @@
         float tM = (uv.y - (M.y - M.w)) / M.w;
         vec2 eM = mix(edges(uPA, tM), edges(uPB, tM), e);
         // Shape changes follow the outline; colour-only changes keep the drawings as they are.
-        vec3 a = uWash > .5 ? tex(uA, fit(uv, M, uBoxA)) : tex(uA, follow(uv, uPA, uBoxA, M, eM));
-        vec3 b = uWash > .5 ? tex(uB, fit(uv, M, uBoxB)) : tex(uB, follow(uv, uPB, uBoxB, M, eM));
+        // Inside the in-between outline the drawings follow it; outside (paper, the hatched
+        // shadow) they keep their own shape, so nothing gets stretched.
+        float px = 1.5 / 512.;
+        float inside = smoothstep(eM.x - px, eM.x + px, uv.x) * (1. - smoothstep(eM.y - px, eM.y + px, uv.x))
+                     * smoothstep(-.004, .004, tM) * (1. - smoothstep(.996, 1.004, tM));
+        float useFollow = inside * (1. - uWash);
+        vec3 a = tex(uA, mix(fit(uv, M, uBoxA), follow(uv, uPA, uBoxA, M, eM), useFollow));
+        vec3 b = tex(uB, mix(fit(uv, M, uBoxB), follow(uv, uPB, uBoxB, M, eM), useFollow));
         // The new stage bleeds in like a wash: grows from the clay outward, with a soft edge.
         float g = clamp((fbm(vUv * 3.2 + vec2(0., uT * .03)) - .25) / .5, 0., 1.) * .7 + (1. - vUv.y) * .3;
         // Shape changes: an even, aligned dissolve. Colour-only changes: the colour spreads like a wash.
@@ -260,32 +270,42 @@
     const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {}; ["uA", "uB", "uPA", "uPB", "uBoxA", "uBoxB", "uF", "uT", "uWash"].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
     gl.uniform1i(U.uA, 0); gl.uniform1i(U.uB, 1); gl.uniform1i(U.uPA, 2); gl.uniform1i(U.uPB, 3);
-    const tex = [], box = [], prof = [];
+    const tex = [], box = [], prof = [], edgesJS = [];
+    const back = $("jar-back"), bg = back.getContext("2d");
+    const unpack = (px, r, o) => ((px[r * 4 + o] << 8) | px[r * 4 + o + 1]) / 65535;
     // The clay's silhouette: coloured pixels (the ink hatching is grey, so it is left out).
     function measure(img) {
       const c = document.createElement("canvas"), N = 256; c.width = c.height = N;
       const g = c.getContext("2d"); g.drawImage(img, 0, 0, N, N);
-      const d = g.getImageData(0, 0, N, N).data; let x0 = N, x1 = 0, y0 = N, y1 = 0;
-      const clay = (k) => { const mx = Math.max(d[k], d[k + 1], d[k + 2]), mn = Math.min(d[k], d[k + 1], d[k + 2]); return mx - mn > 28 && mn < 235; };
-      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (clay((y * N + x) * 4)) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-      // The outline row by row: outermost inked or coloured pixel on each side.
-      const R = 128, px = new Uint8Array(R * 4); let lastL = x0, lastR = x1;
-      for (let r = 0; r < R; r++) {
-        const y = Math.round(y0 + (r / (R - 1)) * (y1 - y0));
-        let L = -1, Rt = -1;
-        for (let x = 0; x < N; x++) { const k = (y * N + x) * 4; if ((d[k] + d[k + 1] + d[k + 2]) / 3 < 222 && clay(k) || (d[k] + d[k + 1] + d[k + 2]) / 3 < 120) { if (L < 0) L = x; Rt = x; } }
-        if (L < 0) { L = lastL; Rt = lastR; } lastL = L; lastR = Rt;
-        const pack = (v, o) => { const q = Math.round(Math.min(.9999, Math.max(0, v)) * 65535); px[r * 4 + o] = q >> 8; px[r * 4 + o + 1] = q & 255; };
-        pack(L / N, 0); pack((Rt + 1) / N, 2);
+      const d = g.getImageData(0, 0, N, N).data;
+      // Each row's outermost drawn pixel (ink or colour) on both sides.
+      const Ls = new Float32Array(N).fill(-1), Rs = new Float32Array(N).fill(-1);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const k = (y * N + x) * 4;
+        if ((d[k] + d[k + 1] + d[k + 2]) / 3 < 228) { if (Ls[y] < 0) Ls[y] = x; Rs[y] = x; }
       }
-      return { box: [(x0 + x1) / 2 / N, (y1 + 1) / N, (x1 - x0 + 1) / N, (y1 - y0 + 1) / N], px };
+      let top = 0; while (top < N - 1 && Ls[top] < 0) top++;
+      // The base: below the widest row the pot narrows towards its foot; where the
+      // hatched shadow starts, the width jumps out again. Stop just before that.
+      let wide = top; for (let y = top; y < N; y++) if (Ls[y] >= 0 && Rs[y] - Ls[y] > Rs[wide] - Ls[wide]) wide = y;
+      let base = wide;
+      for (let y = wide + 1; y < N && Ls[y] >= 0; y++) { if (Rs[y] - Ls[y] > Rs[y - 1] - Ls[y - 1] + 2.5) break; base = y; }
+      let minL = N, maxR = 0;
+      for (let y = top; y <= base; y++) { minL = Math.min(minL, Ls[y]); maxR = Math.max(maxR, Rs[y]); }
+      const R = 128, px = new Uint8Array(R * 4);
+      const pack = (r, v, o) => { const q = Math.round(Math.min(.9999, Math.max(0, v)) * 65535); px[r * 4 + o] = q >> 8; px[r * 4 + o + 1] = q & 255; };
+      for (let r = 0; r < R; r++) {
+        const y = Math.round(top + (r / (R - 1)) * (base - top));
+        pack(r, Ls[y] / N, 0); pack(r, (Rs[y] + 1) / N, 2);
+      }
+      return { box: [(minL + maxR + 1) / 2 / N, (base + 1) / N, (maxR - minL + 1) / N, (base - top + 1) / N], px };
     }
     const ready = Promise.all(Array.from({ length: STAGES }, (_, i) => new Promise((res) => {
       const im = new Image(); im.onload = () => {
         const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
         [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([a, b]) => gl.texParameteri(gl.TEXTURE_2D, a, b));
-        const m = measure(im); tex[i] = t; box[i] = m.box;
+        const m = measure(im); tex[i] = t; box[i] = m.box; edgesJS[i] = m.px;
         const pt = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, pt);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, m.px);
         [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([a, b]) => gl.texParameteri(gl.TEXTURE_2D, a, b));
@@ -296,7 +316,7 @@
     let t0 = performance.now();
     return {
       ready,
-      size(px) { const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.height = Math.round(px * d); gl.viewport(0, 0, cv.width, cv.height); },
+      size(px) { const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.height = Math.round(px * d); gl.viewport(0, 0, cv.width, cv.height); back.width = back.height = cv.width; },
       draw(s) {
         if (!tex[STAGES - 1]) return;
         const i = Math.min(STAGES - 2, Math.max(0, Math.floor(s))), f = Math.min(1, Math.max(0, s - i));
@@ -308,6 +328,13 @@
         gl.uniform1f(U.uF, f); gl.uniform1f(U.uT, (performance.now() - t0) / 1000);
         gl.uniform1f(U.uWash, i >= WASH_FROM ? 1 : 0);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        // The backing: the in-between outline, filled with paper white, a hair inside the ink line.
+        const e = f, A = box[i], B = box[i + 1], W = back.width, inset = 1.4 / 512;
+        const My = A[1] + (B[1] - A[1]) * e, Mh = A[3] + (B[3] - A[3]) * e, top = My - Mh;
+        bg.clearRect(0, 0, W, W); bg.fillStyle = "#fffdf8"; bg.beginPath();
+        for (let r = 0; r < 128; r++) { const x = unpack(edgesJS[i], r, 0) * (1 - e) + unpack(edgesJS[i + 1], r, 0) * e; bg.lineTo((x + inset) * W, (top + (r / 127) * Mh) * W); }
+        for (let r = 127; r >= 0; r--) { const x = unpack(edgesJS[i], r, 2) * (1 - e) + unpack(edgesJS[i + 1], r, 2) * e; bg.lineTo((x - inset) * W, (top + (r / 127) * Mh) * W); }
+        bg.closePath(); bg.fill();
       },
     };
   })();
@@ -336,6 +363,7 @@
       J = { x: W / 2, y: Math.max(70, H * .07) + size / 2, size };
     }
     Object.assign(jar.style, { left: `${J.x - J.size / 2}px`, top: `${J.y - J.size / 2}px`, width: `${J.size}px`, height: `${J.size}px` });
+    Object.assign($("jar-back").style, { left: jar.style.left, top: jar.style.top, width: jar.style.width, height: jar.style.height });
     cutPx = J.y + J.size * .45;
     document.documentElement.style.setProperty("--cut", `${cutPx}px`);
     // The last passage ends the page: at full scroll it sits at the reading point.

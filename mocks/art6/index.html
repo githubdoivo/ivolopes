@@ -126,41 +126,40 @@
 
 
 <script type="module">
-import { createClay } from "./clay-wc.js";
 (function () {
   const T = {
     en: {
       lang: "en", other: "pt", title: "Ivo Lopes · Ceramics", tagline: "ceramics · porto", order: "order", hint: "scroll to shape the clay",
       footer: "made by hand, and in code",
-      stages: ["a ball of clay", "pinched open", "a small bowl", "the first coils", "coil by coil", "one skin", "bisque", "glazed"],
+      stages: ["a ball of clay", "pinched open", "a small bowl", "coil by coil", "one skin", "bisque", "glazed"],
       sections: [
         { id: "top", stage: 0, eyebrow: "ceramics · porto", h1: "Ivo Lopes", lead: "Earth, water, fire and time.", body: ["Ceramics, built by hand. Scroll, and follow a ball of clay all the way to a finished jar."], hint: true },
         { id: "prepare", stage: 0, eyebrow: "01 · prepare", h: "It starts as a ball", body: ["Clay is wedged first: pressed, folded and turned on the bench until the air is out and it is even all the way through. Then it is rolled into a ball.", "Skip it, and a hidden air pocket can crack the piece in the kiln weeks later."] },
-        { id: "pinch", stage: 1, eyebrow: "02 · pinch", h: "Pinch it open", body: ["A thumb goes into the ball. Turning it slowly in the hand, the walls are pinched out between thumb and fingers, a little thinner with every round."] },
-        { id: "base", stage: 2, eyebrow: "03 · base", h: "A small bowl", body: ["The pinched form becomes a bowl with an even wall: the base everything else is built on."] },
-        { id: "coil", stage: 4, eyebrow: "04 · coil", h: "Coil by coil", body: ["Clay is rolled into long ropes and laid around the rim one coil at a time, each one scored and joined to the last with slip. Placing a coil slightly in or out is how the form starts to curve."] },
-        { id: "shape", stage: 5, eyebrow: "05 · shape", h: "One skin", body: ["The coils are blended into one smooth skin with fingers and a wooden rib. No two pieces come out alike, and each keeps a little of the hands that made it."] },
-        { id: "fire", stage: 6, eyebrow: "06 · fire", h: "Through the fire", body: ["Bone dry, the piece goes into the kiln for its first firing, the bisque, at around 950°C. Clay turns into ceramic and shrinks a little on the way."] },
-        { id: "glaze", stage: 7, eyebrow: "07 · glaze", h: "Glaze, and fire again", body: ["Then glaze, and a second, hotter firing that melts it into glass. Every glaze moves a little differently in the heat, so the kiln has the last word."] },
-        { id: "work", stage: 7, eyebrow: "work", h: "A few pieces", body: ["Each one made the same slow way."], works: [["Piece I", "photo coming soon"], ["Piece II", "photo coming soon"], ["Piece III", "photo coming soon"]] },
-        { id: "order", stage: 7, eyebrow: "order", h: "Order a piece", body: ["Have something in mind? Send a photo or two of a piece you love, describe what you would like, and you will get a reply by email with a price."], cta: "Order a piece", mail: "Questions, or just to talk clay:" },
+        { id: "pinch", stage: 4, eyebrow: "02 · pinch", h: "Pinch it open", body: ["A thumb goes into the ball. Turning it slowly in the hand, the walls are pinched out between thumb and fingers, a little thinner with every round."] },
+        { id: "base", stage: 8, eyebrow: "03 · base", h: "A small bowl", body: ["The pinched form becomes a bowl with an even wall: the base everything else is built on."] },
+        { id: "coil", stage: 12, eyebrow: "04 · coil", h: "Coil by coil", body: ["Clay is rolled into long ropes and laid around the rim one coil at a time, each one scored and joined to the last with slip. Placing a coil slightly in or out is how the form starts to curve."] },
+        { id: "shape", stage: 14, eyebrow: "05 · shape", h: "One skin", body: ["The coils are blended into one smooth skin with fingers and a wooden rib. No two pieces come out alike, and each keeps a little of the hands that made it."] },
+        { id: "fire", stage: 17, eyebrow: "06 · fire", h: "Through the fire", body: ["Bone dry, the piece goes into the kiln for its first firing, the bisque, at around 950°C. Clay turns into ceramic and shrinks a little on the way."] },
+        { id: "glaze", stage: 20, eyebrow: "07 · glaze", h: "Glaze, and fire again", body: ["Then glaze, and a second, hotter firing that melts it into glass. Every glaze moves a little differently in the heat, so the kiln has the last word."] },
+        { id: "work", stage: 20, eyebrow: "work", h: "A few pieces", body: ["Each one made the same slow way."], works: [["Piece I", "photo coming soon"], ["Piece II", "photo coming soon"], ["Piece III", "photo coming soon"]] },
+        { id: "order", stage: 20, eyebrow: "order", h: "Order a piece", body: ["Have something in mind? Send a photo or two of a piece you love, describe what you would like, and you will get a reply by email with a price."], cta: "Order a piece", mail: "Questions, or just to talk clay:" },
       ],
     },
     pt: {
       lang: "pt", other: "en", title: "Ivo Lopes · Cerâmica", tagline: "cerâmica · porto", order: "encomendar", hint: "desliza para moldar o barro",
       footer: "feito à mão, e em código",
-      stages: ["uma bola de barro", "aberta à mão", "uma pequena taça", "os primeiros rolos", "rolo a rolo", "uma só pele", "chacota", "vidrado"],
+      stages: ["uma bola de barro", "aberta à mão", "uma pequena taça", "rolo a rolo", "uma só pele", "chacota", "vidrado"],
       sections: [
         { id: "top", stage: 0, eyebrow: "cerâmica · porto", h1: "Ivo Lopes", lead: "Terra, água, fogo e tempo.", body: ["Cerâmica construída à mão. Desliza e acompanha uma bola de barro até ser um jarro acabado."], hint: true },
         { id: "prepare", stage: 0, eyebrow: "01 · preparar", h: "Começa numa bola", body: ["Primeiro, o barro é amassado: pressionado, dobrado e rodado na bancada até sair o ar e ficar uniforme por dentro. Depois, enrola-se numa bola.", "Sem este passo, uma bolha de ar escondida pode rachar a peça no forno semanas depois."] },
-        { id: "pinch", stage: 1, eyebrow: "02 · beliscar", h: "Abrir com o polegar", body: ["Um polegar entra na bola. A rodar devagar na mão, as paredes vão sendo apertadas entre o polegar e os dedos, um pouco mais finas a cada volta."] },
-        { id: "base", stage: 2, eyebrow: "03 · base", h: "Uma pequena taça", body: ["A forma beliscada passa a uma taça de parede uniforme: a base onde tudo o resto é construído."] },
-        { id: "coil", stage: 4, eyebrow: "04 · rolos", h: "Rolo a rolo", body: ["O barro é enrolado em cordas compridas, assentes à volta do bordo um rolo de cada vez, cada um riscado e colado ao anterior com barbotina. Pôr um rolo um pouco mais para dentro ou para fora é o que começa a curvar a forma."] },
-        { id: "shape", stage: 5, eyebrow: "05 · moldar", h: "Uma só pele", body: ["Os rolos são fundidos numa só pele lisa, com os dedos e uma costela de madeira. Não há duas peças iguais, e cada uma guarda um pouco das mãos que a fizeram."] },
-        { id: "fire", stage: 6, eyebrow: "06 · cozer", h: "Pelo fogo", body: ["Bem seca, a peça vai ao forno para a primeira cozedura, a chacota, a cerca de 950°C. O barro passa a cerâmica e encolhe um pouco pelo caminho."] },
-        { id: "glaze", stage: 7, eyebrow: "07 · vidrar", h: "Vidrar, e voltar ao fogo", body: ["Depois vem o vidrado, e uma segunda cozedura, mais quente, que o derrete em vidro. Cada vidrado corre um pouco à sua maneira no calor, por isso a última palavra é do forno."] },
-        { id: "work", stage: 7, eyebrow: "trabalhos", h: "Algumas peças", body: ["Todas feitas da mesma maneira lenta."], works: [["Peça I", "fotografia em breve"], ["Peça II", "fotografia em breve"], ["Peça III", "fotografia em breve"]] },
-        { id: "order", stage: 7, eyebrow: "encomendar", h: "Encomendar uma peça", body: ["Tens uma ideia? Envia uma ou duas fotografias de uma peça de que gostes, descreve o que procuras, e recebes uma resposta por email com um orçamento."], cta: "Encomendar uma peça", mail: "Perguntas, ou só para falar de barro:" },
+        { id: "pinch", stage: 4, eyebrow: "02 · beliscar", h: "Abrir com o polegar", body: ["Um polegar entra na bola. A rodar devagar na mão, as paredes vão sendo apertadas entre o polegar e os dedos, um pouco mais finas a cada volta."] },
+        { id: "base", stage: 8, eyebrow: "03 · base", h: "Uma pequena taça", body: ["A forma beliscada passa a uma taça de parede uniforme: a base onde tudo o resto é construído."] },
+        { id: "coil", stage: 12, eyebrow: "04 · rolos", h: "Rolo a rolo", body: ["O barro é enrolado em cordas compridas, assentes à volta do bordo um rolo de cada vez, cada um riscado e colado ao anterior com barbotina. Pôr um rolo um pouco mais para dentro ou para fora é o que começa a curvar a forma."] },
+        { id: "shape", stage: 14, eyebrow: "05 · moldar", h: "Uma só pele", body: ["Os rolos são fundidos numa só pele lisa, com os dedos e uma costela de madeira. Não há duas peças iguais, e cada uma guarda um pouco das mãos que a fizeram."] },
+        { id: "fire", stage: 17, eyebrow: "06 · cozer", h: "Pelo fogo", body: ["Bem seca, a peça vai ao forno para a primeira cozedura, a chacota, a cerca de 950°C. O barro passa a cerâmica e encolhe um pouco pelo caminho."] },
+        { id: "glaze", stage: 20, eyebrow: "07 · vidrar", h: "Vidrar, e voltar ao fogo", body: ["Depois vem o vidrado, e uma segunda cozedura, mais quente, que o derrete em vidro. Cada vidrado corre um pouco à sua maneira no calor, por isso a última palavra é do forno."] },
+        { id: "work", stage: 20, eyebrow: "trabalhos", h: "Algumas peças", body: ["Todas feitas da mesma maneira lenta."], works: [["Peça I", "fotografia em breve"], ["Peça II", "fotografia em breve"], ["Peça III", "fotografia em breve"]] },
+        { id: "order", stage: 20, eyebrow: "encomendar", h: "Encomendar uma peça", body: ["Tens uma ideia? Envia uma ou duas fotografias de uma peça de que gostes, descreve o que procuras, e recebes uma resposta por email com um orçamento."], cta: "Encomendar uma peça", mail: "Perguntas, ou só para falar de barro:" },
       ],
     },
   };
@@ -188,7 +187,7 @@ import { createClay } from "./clay-wc.js";
       ${s.h1 ? `<h1>${esc(s.h1)}</h1>` : `<h2>${esc(s.h)}</h2>`}
       ${s.lead ? `<p class="lead">${esc(s.lead)}</p>` : ""}
       ${s.body.map((p) => `<p>${esc(p)}</p>`).join("")}
-      ${s.works ? `<div class="works">${s.works.map(([t, n]) => `<figure class="piece"><div class="ph"><img src="assets/stage-7.webp" alt="" loading="lazy"></div><figcaption>${esc(t)}<small>${esc(n)}</small></figcaption></figure>`).join("")}</div>` : ""}
+      ${s.works ? `<div class="works">${s.works.map(([t, n]) => `<figure class="piece"><div class="ph"><img src="assets/f-20.webp" alt="" loading="lazy"></div><figcaption>${esc(t)}<small>${esc(n)}</small></figcaption></figure>`).join("")}</div>` : ""}
       ${s.cta ? `<a class="order-btn" href="${ORDER_URL}">${esc(s.cta)} <span aria-hidden="true">→</span></a><p class="mail">${esc(s.mail)} <a href="mailto:mail@ivolopes.com">mail@ivolopes.com</a></p><p class="foot">${esc(c.footer)}</p>` : ""}
       ${s.hint ? `<p class="hint"><i></i>${esc(c.hint)}</p>` : ""}
     </div></section>`).join("");
@@ -199,19 +198,97 @@ import { createClay } from "./clay-wc.js";
 
 
 
-  /* The jar: the live site's 3D clay, painted in watercolour and ink.
-     It is one shape whose profile is pinched, coiled, smoothed and fired as
-     you scroll, so the change is continuous rather than picture to picture. */
+  /* The jar: a real morph between seven drawings (WebGL).
+     Each drawing's clay silhouette is measured once. Mid-transition both
+     drawings are stretched onto the same in-between silhouette, anchored at
+     the base, so one object visibly changes shape; the new stage bleeds in
+     through a watercolour edge, with a slight wet-ink ripple. */
   const jar = $("jar");
-  const cv = document.createElement("canvas"); jar.appendChild(cv);
-  let clay = null;
-  try { clay = createClay(cv, { reducedMotion: still, style: "watercolour" }); }
-  catch (e) { const im = document.createElement("img"); im.src = "assets/stage-7.webp"; im.alt = ""; im.className = "first"; jar.appendChild(im); }
+  const STAGES = 21;   // frames f-00 … f-20: the seven drawings and the in-betweens
+  const morph = (() => {
+    const cv = document.createElement("canvas");
+    const gl = cv.getContext("webgl", { premultipliedAlpha: false, antialias: true });
+    if (!gl) return null;
+    jar.appendChild(cv);
+    const VS = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }";
+    const FS = `precision highp float;
+      uniform sampler2D uA, uB; uniform vec4 uBoxA, uBoxB; uniform float uF, uT; varying vec2 vUv;
+      float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+        return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
+      float fbm(vec2 p){ float s = 0., a = .5; for (int i = 0; i < 5; i++){ s += a * n(p); p = p * 2.03 + 7.1; a *= .5; } return s; }
+      // box: centre x, base y, width, height (uv). Map a screen uv on box M into box S.
+      vec2 fit(vec2 uv, vec4 M, vec4 S){ return vec2(S.x + (uv.x - M.x) * S.z / M.z, S.y + (uv.y - M.y) * S.w / M.w); }
+      vec3 tex(sampler2D t, vec2 uv){ if (uv.x < 0. || uv.y < 0. || uv.x > 1. || uv.y > 1.) return vec3(1.); return texture2D(t, uv).rgb; }
+      void main(){
+        float f = uF, e = f;
+        vec4 M = mix(uBoxA, uBoxB, e);
+        float wob = sin(3.14159 * f);
+        vec2 uv = vUv + (vec2(fbm(vUv * 6. + uT * .15), fbm(vUv * 6. + 4. - uT * .12)) - .5) * .012 * wob;
+        vec3 a = tex(uA, fit(uv, M, uBoxA)), b = tex(uB, fit(uv, M, uBoxB));
+        // The new stage bleeds in like a wash: grows from the clay outward, with a soft edge.
+        float g = clamp((fbm(vUv * 3.2 + vec2(0., uT * .03)) - .25) / .5, 0., 1.) * .7 + (1. - vUv.y) * .3;
+        float m = smoothstep(g - .22, g + .22, f * 1.44 - .22);
+        vec3 col = mix(a, b, m);
+        // Watercolour bloom: pigment gathers at the wet edge.
+        float edge = 1. - abs(m * 2. - 1.);
+        col *= 1. - edge * .06 * wob * smoothstep(.05, .2, 1. - min(col.r, min(col.g, col.b)));
+        gl_FragColor = vec4(col, 1.);
+      }`;
+    const sh = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr); gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const U = {}; ["uA", "uB", "uBoxA", "uBoxB", "uF", "uT"].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
+    gl.uniform1i(U.uA, 0); gl.uniform1i(U.uB, 1);
+    const tex = [], box = [];
+    // The clay's silhouette: coloured pixels (the ink hatching is grey, so it is left out).
+    function measure(img) {
+      const c = document.createElement("canvas"), N = 200; c.width = c.height = N;
+      const g = c.getContext("2d"); g.drawImage(img, 0, 0, N, N);
+      const d = g.getImageData(0, 0, N, N).data; let x0 = N, x1 = 0, y0 = N, y1 = 0;
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const k = (y * N + x) * 4, mx = Math.max(d[k], d[k + 1], d[k + 2]), mn = Math.min(d[k], d[k + 1], d[k + 2]);
+        if (mx - mn > 28 && mn < 235) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      return [(x0 + x1) / 2 / N, (y1 + 1) / N, (x1 - x0 + 1) / N, (y1 - y0 + 1) / N];
+    }
+    const ready = Promise.all(Array.from({ length: STAGES }, (_, i) => new Promise((res) => {
+      const im = new Image(); im.onload = () => {
+        const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+        [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([a, b]) => gl.texParameteri(gl.TEXTURE_2D, a, b));
+        tex[i] = t; box[i] = measure(im); res();
+      };
+      im.src = `assets/f-${String(i).padStart(2, "0")}.webp`;
+    })));
+    let t0 = performance.now();
+    return {
+      ready,
+      size(px) { const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.height = Math.round(px * d); gl.viewport(0, 0, cv.width, cv.height); },
+      draw(s) {
+        if (!tex[STAGES - 1]) return;
+        const i = Math.min(STAGES - 2, Math.max(0, Math.floor(s))), f = Math.min(1, Math.max(0, s - i));
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex[i]);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex[i + 1]);
+        gl.uniform4fv(U.uBoxA, box[i]); gl.uniform4fv(U.uBoxB, box[i + 1]);
+        gl.uniform1f(U.uF, f); gl.uniform1f(U.uT, (performance.now() - t0) / 1000);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      },
+    };
+  })();
+  // Without WebGL: the drawings simply crossfade.
+  const imgs = morph ? [] : Array.from({ length: STAGES }, (_, i) => {
+    const im = document.createElement("img"); im.src = `assets/f-${String(i).padStart(2, "0")}.webp`; im.alt = "";
+    if (i === 0) im.className = "first"; jar.appendChild(im); return im;
+  });
 
   // Where the table edge sits in the wall image (fraction of its height), and
   // where the drawings' ground line sits in their square (fraction of size).
   // GROUND: where the clay's base sits in its canvas (fraction of its height).
-  const WALL = { w: 1672, h: 941, table: .822 }, GROUND = .79;
+  const WALL = { w: 1672, h: 941, table: .822 }, GROUND = .835;
   let J = { x: 0, y: 0, size: 0 };
   function layout() {
     cards();
@@ -233,6 +310,7 @@ import { createClay } from "./clay-wc.js";
     const last = sections[sections.length - 1], lc = last.querySelector(".card");
     last.style.minHeight = "0"; last.style.paddingBottom = "0";
     last.style.paddingBottom = `${Math.max(0, H - readAt() - (wide() ? lc.offsetHeight / 2 : lc.offsetHeight))}px`;
+    if (morph) morph.size(J.size);
     shown = -1;
     const k = $("kiln");
     Object.assign(k.style, { left: `${J.x - J.size * .55}px`, top: `${J.y - J.size * .5}px`, width: `${J.size * 1.1}px`, height: `${J.size * 1.05}px` });
@@ -276,17 +354,21 @@ import { createClay } from "./clay-wc.js";
     fadeText();
     if (Math.abs(s - shown) < .001) return;
     shown = s;
-    clay?.setStage(s);
+    if (morph) morph.draw(s);
+    imgs.forEach((im, i) => { im.style.opacity = Math.max(0, 1 - Math.abs(s - i)).toFixed(3); });
     // The kiln: a warm glow while the raw jar is fired into bisque.
-    $("kiln").style.opacity = cv.dataset.glow || 0;
-    const n = Math.round(s);
+    // The kiln: a warm glow while the raw jar is fired into bisque.
+    $("kiln").style.opacity = Math.max(0, 1 - Math.abs(s - 15.5) / 1.6).toFixed(3);
+    const KEYS = [0, 4, 8, 12, 14, 17, 20];
+    let n = 0; KEYS.forEach((k, i) => { if (Math.abs(s - k) < Math.abs(s - KEYS[n])) n = i; });
     const lb = $("label");
     const txt = `<b>${String(n + 1).padStart(2, "0")}</b>${esc(c.stages[n])}`;
     if (lb.dataset.n !== String(n)) { lb.dataset.n = n; lb.innerHTML = txt; }
   }
   addEventListener("scroll", onScroll, { passive: true });
   // The kiln glow follows the clay's own firing value, which it sets every frame.
-  (function glow() { $("kiln").style.opacity = cv.dataset.glow || 0; requestAnimationFrame(glow); })();
+  if (morph) morph.ready.then(() => { shown = -1; onScroll();
+    if (!still) (function tick() { const s = stageNow(), f = s - Math.floor(s); if (f > .01 && f < .99) morph.draw(s); requestAnimationFrame(tick); })(); });
   addEventListener("resize", layout);
   layout();
   if (q.has("at")) { const t = document.getElementById(q.get("at")); if (t) { const cd = t.querySelector(".card"); scrollTo({ top: anchorOf(cd) + scrollY - readAt(), behavior: "instant" }); onScroll(); } }

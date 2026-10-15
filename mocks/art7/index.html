@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Ivo Lopes · Ceramics</title>
+<meta name="theme-color" content="#efe3cf">
+<link rel="icon" href="assets/stamp.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/pano.webp">
+<style>
+  /* An unrolling hand-scroll (emakimono): scrolling down moves a painted
+     panorama sideways, from the Porto riverside, past each stage of the clay,
+     through the kiln, to a shelf of finished pieces and the order. Every pot
+     is its own complete painting; nothing morphs. */
+  :root {
+    --paper: #efe3cf; --ink: #3b2f27; --ink-soft: #6c5f53; --seal: #c4261e; --clay: #a8562f;
+    --serif: "Shippori Mincho", "Hiragino Mincho ProN", Georgia, serif;
+    --sans: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+  body { color: var(--ink); font: 400 15px/1.8 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 1.5px solid var(--seal); outline-offset: 4px; border-radius: 2px; }
+
+  .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+  .track { position: absolute; top: 0; left: 0; height: 100%; will-change: transform; }
+  .pano { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .glow { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; mix-blend-mode: screen;
+    background: radial-gradient(closest-side, rgba(255, 170, 80, .9), rgba(255, 120, 40, .35) 55%, transparent); filter: blur(6px); }
+  .path { position: absolute; display: block; mix-blend-mode: multiply; opacity: 1; }
+  .pot { position: absolute; transform-origin: 50% 83.5%; mix-blend-mode: multiply; }
+  .pot img { display: block; width: 100%; height: 100%; }
+  /* The wash: the painting appears through a soft circle that spreads from its base. */
+  .pot, .card, .shelf-card { -webkit-mask-image: radial-gradient(circle at 50% 80%, #000 var(--r, 0%), transparent calc(var(--r, 0%) + 18%));
+    mask-image: radial-gradient(circle at 50% 80%, #000 var(--r, 0%), transparent calc(var(--r, 0%) + 18%)); }
+  .card, .shelf-card { -webkit-mask-image: none; mask-image: none; }
+
+  .card { position: absolute; width: 290px; opacity: 0; padding: 22px 24px; border-radius: 4px;
+    background: radial-gradient(closest-side, rgba(244, 235, 220, .94) 62%, rgba(244, 235, 220, 0) 100%); padding: 34px 40px; transform: translateY(10px); transition: opacity .9s ease, transform .9s ease; }
+  .card.in { opacity: 1; transform: none; }
+  .card .n { font: 500 11px var(--sans); letter-spacing: .3em; color: var(--clay); }
+  .card h2 { font: 500 26px/1.2 var(--serif); margin: 6px 0 8px; padding-bottom: 9px; border-bottom: 1px solid rgba(59, 47, 39, .22); }
+  .card p { font-size: 14.5px; line-height: 1.75; color: var(--ink); }
+  .intro { width: 460px; padding: 30px 34px; }
+  .intro h1 { font: 500 clamp(44px, 6vh, 64px)/1.05 var(--serif); letter-spacing: -.01em; }
+  .intro .sub { font: 500 11px var(--sans); letter-spacing: .34em; text-transform: uppercase; color: var(--ink-soft); margin: 10px 0 14px; display: flex; align-items: center; gap: 12px; }
+  .intro .sub img { width: 34px; height: 34px; }
+  .intro .lead { font: 400 20px/1.5 var(--serif); margin-bottom: 10px; }
+  .hint { margin-top: 18px; font: 500 11px var(--sans); letter-spacing: .26em; color: var(--ink-soft); display: flex; align-items: center; gap: 12px; text-transform: lowercase; }
+  .hint i { width: 46px; height: 1px; background: var(--ink-soft); position: relative; }
+  .hint i::after { content: ""; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-top: 1px solid var(--ink-soft); border-right: 1px solid var(--ink-soft); transform: rotate(45deg); }
+
+  .frame { position: absolute; background: #f7efe2; padding: 8px 8px 22px; box-shadow: 0 6px 16px rgba(60, 40, 20, .18); text-align: center; }
+  .frame div { width: 100%; aspect-ratio: 4 / 5; background: rgba(168, 86, 47, .1); display: grid; place-items: center; color: var(--ink-soft); font: 400 11px var(--sans); letter-spacing: .1em; }
+  .order-btn { display: inline-flex; align-items: center; gap: 12px; margin-top: 14px; padding: 13px 22px; background: var(--clay); color: #fbf3e8; text-decoration: none; font: 500 13px var(--sans); letter-spacing: .16em; }
+  .order-btn:hover { background: #8f4523; }
+  .mail { display: block; margin-top: 12px; font-size: 14px; }
+  .seal-end { width: 42px; height: 42px; margin-top: 14px; display: block; }
+
+  .branch { position: absolute; pointer-events: none; }
+
+  .top { position: fixed; z-index: 5; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 16px clamp(16px, 4vw, 48px); pointer-events: none; }
+  .top a, .top button { pointer-events: auto; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 500 14px var(--serif); letter-spacing: .04em; }
+  .brand img { width: 30px; height: 30px; }
+  .top nav { display: flex; gap: 18px; font: 500 12px var(--sans); letter-spacing: .16em; }
+  .top nav a, .top nav button { background: none; border: 0; font: inherit; letter-spacing: inherit; color: var(--ink); text-decoration: none; cursor: pointer; text-transform: lowercase; }
+  .progress { position: fixed; z-index: 5; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(220px, 40vw); height: 1px; background: rgba(59, 47, 39, .2); }
+  .progress i { position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--clay); }
+
+  @media (max-width: 700px) {
+    .card { width: 220px; } .card h2 { font-size: 21px; } .card p { font-size: 13.5px; }
+    .intro { width: 280px; } .intro .lead { font-size: 17px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#" id="home"><img src="assets/stamp.png" alt=""><span>Ivo Lopes</span></a>
+  <nav><a href="#" id="nav-order">order</a><button type="button" id="lang">pt</button></nav>
+</header>
+<div id="scroller">
+  <div class="stage">
+    <div class="track" id="track">
+      <img class="pano" src="assets/pano.webp" alt="" aria-hidden="true">
+      <div class="glow" id="glow" aria-hidden="true"></div>
+      <img class="path" id="path" src="assets/path.webp" alt="" aria-hidden="true">
+      <div id="layer"></div>
+    </div>
+    <div id="front" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply"></div>
+  </div>
+</div>
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+<script>
+(function () {
+  const T = {
+    en: { other: "pt", order: "order", hint: "scroll to unroll",
+      intro: { sub: "ceramics · porto", h1: "Ivo Lopes", lead: "Earth, water, fire and time.", p: "I build pots by hand in Porto, slowly, one at a time. Scroll, and follow a ball of clay along the river to a finished jar." },
+      stages: [
+        ["01", "It starts as a ball", "I wedge the clay until the air is out, then roll it into a ball."],
+        ["02", "Pinch it open", "A thumb goes in. Turning it in my hand, I pinch the walls out, a little thinner each round."],
+        ["03", "A small bowl", "The pinched form becomes a bowl with an even wall: the base for everything else."],
+        ["04", "Coil by coil", "I roll ropes of clay and lay them on the rim, one at a time, each joined to the last."],
+        ["05", "One skin", "The coils are blended into one smooth surface with my fingers and a wooden rib."],
+        ["06", "Through the fire", "Bone dry, it goes into the kiln at around 950°C. Clay becomes ceramic."],
+        ["07", "Glaze, and fire again", "A second, hotter firing melts the glaze into glass. The kiln has the last word."],
+      ],
+      pieces: ["finished pieces", "A few pieces", "Each one made the same slow way."], photo: "photo soon",
+      orderT: ["order", "Order a piece", "Have something in mind? Send a photo or two, describe what you would like, and you will get a reply by email with a price."], cta: "Order a piece" },
+    pt: { other: "en", order: "encomendar", hint: "desliza para desenrolar",
+      intro: { sub: "cerâmica · porto", h1: "Ivo Lopes", lead: "Terra, água, fogo e tempo.", p: "Construo peças à mão no Porto, devagar, uma de cada vez. Desliza e segue uma bola de barro ao longo do rio até ser um jarro acabado." },
+      stages: [
+        ["01", "Começa numa bola", "Amasso o barro até sair todo o ar e enrolo-o numa bola."],
+        ["02", "Abrir com o polegar", "Um polegar entra. A rodar na mão, aperto as paredes, um pouco mais finas a cada volta."],
+        ["03", "Uma pequena taça", "A forma beliscada passa a uma taça de parede uniforme: a base para tudo o resto."],
+        ["04", "Rolo a rolo", "Enrolo cordas de barro e assento-as no bordo, uma de cada vez, cada uma colada à anterior."],
+        ["05", "Uma só pele", "Os rolos fundem-se numa só superfície lisa, com os dedos e uma costela de madeira."],
+        ["06", "Pelo fogo", "Bem seca, vai ao forno a cerca de 950°C. O barro passa a cerâmica."],
+        ["07", "Vidrar, e voltar ao fogo", "Uma segunda cozedura, mais quente, derrete o vidrado em vidro. A última palavra é do forno."],
+      ],
+      pieces: ["peças acabadas", "Algumas peças", "Todas feitas da mesma maneira lenta."], photo: "fotografia em breve",
+      orderT: ["encomendar", "Encomendar uma peça", "Tens uma ideia? Envia uma ou duas fotografias, descreve o que procuras, e recebes uma resposta por email com um orçamento."], cta: "Encomendar uma peça" },
+  };
+  const q = new URLSearchParams(location.search);
+  let saved = null; try { saved = localStorage.getItem("lang"); } catch (_) {}
+  const L = q.get("lang") || saved || ((navigator.language || "").toLowerCase().startsWith("pt") ? "pt" : "en");
+  const c = T[L === "pt" ? "pt" : "en"], lang = L === "pt" ? "pt" : "en";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.documentElement.lang = lang;
+  $("nav-order").textContent = c.order; $("lang").textContent = c.other;
+  $("lang").addEventListener("click", () => { try { localStorage.setItem("lang", c.other); } catch (_) {} location.search = `?lang=${c.other}`; });
+  const ORDER_URL = `https://art.ivolopes.com/order/?lang=${lang}`;
+
+  /* ---------- The scroll's layout, in fractions of the panorama (x of width, y of height) ---------- */
+  const PANO = 8767 / 1000;
+  const POTS = [ // x, base y, size (of height)
+    [.300, .90, .40], [.368, .90, .40], [.436, .90, .40], [.504, .90, .40], [.568, .905, .40], [.618, .93, .40], [.708, .92, .40],
+  ];
+  const CARDS = [ // stage text: centred over its pot, in the sky
+    [.300, .2], [.368, .2], [.436, .2], [.504, .2], [.568, .14], [.640, .12], [.712, .14],
+  ];
+  const KILN = [.607, .62];          // centre of the kiln mouth
+  const SHELF = { y: .535, frames: [.765, .82, .875] };
+  const BRANCHES = [[.24, 0, 1], [.55, 0, 2], [.86, 0, 3]];   // foreground, hanging from the top
+
+  const layer = $("layer"), front = $("front");
+  // Intro
+  layer.insertAdjacentHTML("beforeend", `<div class="card intro" data-x=".03" data-y=".14" data-anchor="left">
+    <h1>${esc(c.intro.h1)}</h1><p class="sub"><img src="assets/stamp.png" alt="">${esc(c.intro.sub)}</p>
+    <p class="lead">${esc(c.intro.lead)}</p><p>${esc(c.intro.p)}</p><p class="hint"><i></i>${esc(c.hint)}</p></div>`);
+  // Pots and their cards
+  POTS.forEach(([x, y, s], i) => {
+    layer.insertAdjacentHTML("beforeend", `<div class="pot" data-x="${x}" data-y="${y}" data-s="${s}" data-i="${i}"><img src="assets/pot-${i + 1}.webp" alt=""></div>`);
+    const [n, h, p] = c.stages[i];
+    layer.insertAdjacentHTML("beforeend", `<div class="card" data-x="${CARDS[i][0]}" data-y="${CARDS[i][1]}"><span class="n">${n}</span><h2>${esc(h)}</h2><p>${esc(p)}</p></div>`);
+  });
+  // Pieces on the shelf, then the order
+  SHELF.frames.forEach((x) => layer.insertAdjacentHTML("beforeend", `<div class="frame" data-x="${x}" data-y="${SHELF.y}" data-s=".2"><div>${esc(c.photo)}</div></div>`));
+  layer.insertAdjacentHTML("beforeend", `<div class="card" data-x=".80" data-y=".1"><span class="n">${esc(c.pieces[0])}</span><h2>${esc(c.pieces[1])}</h2><p>${esc(c.pieces[2])}</p></div>`);
+  layer.insertAdjacentHTML("beforeend", `<div class="card" id="order" data-x=".935" data-y=".1"><span class="n">${esc(c.orderT[0])}</span><h2>${esc(c.orderT[1])}</h2><p>${esc(c.orderT[2])}</p>
+    <a class="order-btn" href="${ORDER_URL}">${esc(c.cta)} <span aria-hidden="true">→</span></a><a class="mail" href="mailto:mail@ivolopes.com">mail@ivolopes.com</a><img class="seal-end" src="assets/stamp.png" alt=""></div>`);
+  BRANCHES.forEach(([x, y, n]) => front.insertAdjacentHTML("beforeend", `<img class="branch" data-x="${x}" data-y="${y}" data-n="${n}" src="assets/branch-${n}.webp" alt="">`));
+
+  /* ---------- Size everything to the screen ---------- */
+  let H, W, TW, MAX;
+  const items = () => [...layer.children];
+  function layout() {
+    H = innerHeight; W = innerWidth; TW = Math.round(H * PANO); MAX = Math.max(0, TW - W);
+    $("track").style.width = `${TW}px`;
+    $("scroller").style.height = `${MAX + H}px`;
+    const narrow = W < 700;
+    items().forEach((el) => {
+      const x = +el.dataset.x * TW, y = +el.dataset.y * H, s = +el.dataset.s || 0;
+      if (el.classList.contains("pot")) { const sz = s * H; Object.assign(el.style, { width: `${sz}px`, height: `${sz}px`, left: `${x - sz / 2}px`, top: `${y - sz * .835}px` }); }
+      else if (el.classList.contains("frame")) { const w = s * H * .62; Object.assign(el.style, { width: `${w}px`, left: `${x - w / 2}px`, top: "", bottom: `${H - y}px` }); }
+      else if (el.dataset.anchor === "left") { Object.assign(el.style, { left: `${Math.max(x, narrow ? 20 / TW : 0) * 1 + (narrow ? 20 : 0)}px`, top: `${y + (narrow ? 50 : 0)}px` }); }
+      else { const w = el.offsetWidth; Object.assign(el.style, { left: `${x - w / 2}px`, top: `${y + (narrow ? 40 : 0)}px` }); }
+    });
+    const p = $("path"); Object.assign(p.style, { left: `${.06 * TW}px`, width: `${.9 * TW}px`, top: `${.885 * H}px`, height: `${.9 * TW * 50 / 1515}px` });
+    const g = $("glow"), gw = .14 * H; Object.assign(g.style, { left: `${KILN[0] * TW - gw}px`, top: `${KILN[1] * H - gw}px`, width: `${gw * 2}px`, height: `${gw * 2}px` });
+    [...front.children].forEach((b) => { const w = H * .34; Object.assign(b.style, { width: `${w}px`, top: `${-w * .28}px` }); });
+    onScroll();
+  }
+
+  /* ---------- Scroll: move the scroll sideways, reveal as things arrive ---------- */
+  const reveal = new Set();
+  function onScroll() {
+    const s = Math.min(MAX, Math.max(0, scrollY)), u = MAX ? s / MAX : 1;
+    $("track").style.transform = `translate3d(${-s}px, 0, 0)`;
+    // Foreground branches pass a little faster than the painting: depth.
+    [...front.children].forEach((b) => { b.style.transform = `translate3d(${+b.dataset.x * TW - s * 1.25}px, 0, 0)`; });
+    // The ink path draws itself along the way.
+    const pathX = .06 * TW, pathW = .9 * TW, head = s + W * .62;
+    const shown = Math.max(0, Math.min(1, (head - pathX) / pathW));
+    $("path").style.clipPath = `inset(0 ${((1 - shown) * 100).toFixed(2)}% 0 0)`;
+    // Pots and texts appear when they reach the middle of the screen.
+    items().forEach((el) => {
+      const x = +el.dataset.x * TW - s;
+      const k = Math.max(0, Math.min(1, (W * .92 - x) / (W * .35)));
+      if (el.classList.contains("pot")) { el.style.setProperty("--r", `${(still ? 1 : k) * 100}%`); }
+      else if (el.classList.contains("card")) { if (still || x < W * .85 || el.classList.contains("intro")) el.classList.add("in"); }
+    });
+    // The kiln warms as the bisque jar comes into view.
+    const kx = KILN[0] * TW - s, kd = Math.abs(kx - W * .5) / (W * .6);
+    $("glow").style.opacity = Math.max(0, 1 - kd).toFixed(3);
+    $("bar").style.width = `${(u * 100).toFixed(1)}%`;
+  }
+  addEventListener("scroll", onScroll, { passive: true });
+  addEventListener("resize", layout);
+  // Nav: "order" scrolls to the end of the scroll.
+  $("nav-order").addEventListener("click", (e) => { e.preventDefault(); scrollTo({ top: MAX, behavior: still ? "auto" : "smooth" }); });
+  $("home").addEventListener("click", (e) => { e.preventDefault(); scrollTo({ top: 0, behavior: still ? "auto" : "smooth" }); });
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(layout);
+  layout();
+  if (q.has("u")) scrollTo({ top: MAX * +q.get("u"), behavior: "instant" });
+})();
+</script>
+</body>
+</html>

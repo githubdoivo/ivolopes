@@ -11,5 +11,7 @@ shared contact is mail@ivolopes.com.
 | MOSS (DJ, producer) | moss.ivolopes.com | githubdoivo/moss |
 | Stage (dance, acting) | stage.ivolopes.com | soon |
 
-`mocks/` holds the four design directions (A index, B four rooms, C orbit,
-D card); `index.html` is currently direction A.
+`index.html` is the solar system: the sun is the Contact link (mail), and the
+planets are the areas. Images in `assets/` come from a ChatGPT mockup (sky,
+plus planets cut out of a sprite sheet with circular masks).
+`mocks/` holds the earlier design directions.

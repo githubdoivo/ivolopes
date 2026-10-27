@@ -41,7 +41,7 @@
   --cond: "Barlow Semi Condensed", "Avenir Next Condensed", system-ui, sans-serif;
   --sans: "Inter", system-ui, sans-serif;
 }
-html { background: #f1c79c; }
+html { overscroll-behavior-y: none; background: #f1c79c linear-gradient(#22486a, #5b7f9a 45%, #f1c79c); }  /* the sky's colours, until the image loads */
 body {
   min-height: 100vh; min-height: 100svh;
   color: var(--ink); font: 15px/1.45 var(--sans);
@@ -49,12 +49,13 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
-/* Sky: the one painted background, nudged by the pointer. */
+/* Sky: the one painted background. It holds still, and it is sized to the
+   tallest the screen can get (100lvh), so no edge shows when a phone's
+   browser bars slide away. */
 .sky {
-  position: fixed; inset: -3%;
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 100vh; height: 100lvh;
   background: url(assets/sky.webp) center 40% / cover no-repeat;
-  transform: translate3d(var(--px, 0), var(--py, 0), 0) scale(1.02);
-  transition: transform .8s cubic-bezier(.2, .7, .2, 1);
   z-index: -2;
 }
 .sky::after { /* darker top edge so the header always reads */
@@ -155,7 +156,7 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 
 /* Phone and tall windows: a vertical line-up under the sun. */
 @media (max-width: 760px), (max-aspect-ratio: 4/5) {
-  .sky { inset: 0; transform: none; background-position: 46% 30%; }
+  .sky { background-position: 46% 30%; }
   header { padding: 18px 20px 0; }
   main { padding: 6px 20px 40px; overflow-x: clip; }
   .system { --w: 100%; aspect-ratio: auto; width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
@@ -177,7 +178,6 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .sky { transform: none; }
   .orbits animateMotion { display: none; }
 }
 </style>
@@ -239,21 +239,6 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
   </div>
 </main>
 
-<script>
-  // Gentle parallax: the sky drifts a little against the pointer.
-  (function () {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
-    var sky = document.querySelector(".sky"), raf = 0;
-    addEventListener("pointermove", function (e) {
-      if (raf) return;
-      raf = requestAnimationFrame(function () {
-        raf = 0;
-        sky.style.setProperty("--px", ((e.clientX / innerWidth - .5) * -14).toFixed(1) + "px");
-        sky.style.setProperty("--py", ((e.clientY / innerHeight - .5) * -10).toFixed(1) + "px");
-      });
-    }, { passive: true });
-  })();
-</script>
 <!-- Cloudflare Web Analytics: cookie-free, on the real domain only. -->
 <script>
   if (location.hostname === "ivolopes.com") {

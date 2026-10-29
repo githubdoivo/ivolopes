@@ -14,4 +14,4 @@ shared contact is mail@ivolopes.com.
 `index.html` is the solar system: the sun is the Contact link (mail), and the
 planets are the areas. Images in `assets/` come from a ChatGPT mockup (sky,
 plus planets cut out of a sprite sheet with circular masks).
-`mocks/` holds the earlier design directions.
+Earlier design mocks live in `mocks/` on the Mac only (git-ignored, not published).

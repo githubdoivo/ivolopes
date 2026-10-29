@@ -1,3 +1,5 @@
 node_modules/
 test-results/
 playwright-report/
+# Design mocks stay on this Mac only: they are not part of the live site.
+mocks/

@@ -5,6 +5,7 @@ const SITES = {
   qa: "https://qa.ivolopes.com",
   art: "https://art.ivolopes.com",
   moss: "https://moss.ivolopes.com",
+  stage: "https://stage.ivolopes.com",
 };
 
 for (const [name, url] of Object.entries(SITES)) {
@@ -25,7 +26,7 @@ for (const [name, url] of Object.entries(SITES)) {
 }
 
 // Only the hub links to the areas. The areas never link to the hub or to each other.
-for (const name of ["qa", "art", "moss"]) {
+for (const name of ["qa", "art", "moss", "stage"]) {
   test(`${name} does not link to the hub or the other areas`, async ({ page }) => {
     await page.goto(SITES[name], { waitUntil: "networkidle" });
     const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.href));

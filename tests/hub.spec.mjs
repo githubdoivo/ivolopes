@@ -18,19 +18,17 @@ test("the sun is the contact: it opens an email", async ({ page }) => {
   await expect(page.locator("a.sun")).toHaveAccessibleName(/email/i);
 });
 
-test("each planet leads to its own area, and stage is marked Soon", async ({ page }) => {
+test("each planet leads to its own area", async ({ page }) => {
   await page.goto("/");
-  for (const area of ["qa", "art", "moss"]) {
+  for (const area of ["qa", "art", "moss", "stage"]) {
     await expect(page.locator(`a.planet.${area}`)).toHaveAttribute("href", `https://${area}.ivolopes.com`);
   }
-  await expect(page.locator(".planet.stage")).toContainText("Soon");
-  expect(await page.locator(".planet.stage a, a.planet.stage").count()).toBe(0);
 });
 
 test("only the four areas and the email are linked: nothing else leaks out", async ({ page }) => {
   await page.goto("/");
   const hrefs = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href")));
-  for (const h of hrefs) expect(h).toMatch(/^(mailto:mail@ivolopes\.com|https:\/\/(qa|art|moss)\.ivolopes\.com)$/);
+  for (const h of hrefs) expect(h).toMatch(/^(mailto:mail@ivolopes\.com|https:\/\/(qa|art|moss|stage)\.ivolopes\.com)$/);
 });
 
 test("every planet is on screen and none sits on the sun", async ({ page }) => {
@@ -100,4 +98,31 @@ test("the sky holds still and always covers the whole screen", async ({ page }) 
     const after = await page.locator(".sky").evaluate((el) => el.getBoundingClientRect().bottom);
     expect(after, `bottom after scrolling at ${vp.width}`).toBeGreaterThanOrEqual(vp.height);
   }
+});
+
+test("the hub speaks Portuguese too, and remembers the choice", async ({ page }) => {
+  await page.goto("/?lang=en");
+  await expect(page.locator(".brand small")).toHaveText("Different orbits, same universe.");
+  await page.locator("#lang").click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt");
+  await expect(page.locator(".brand small")).toHaveText("Órbitas diferentes, o mesmo universo.");
+  await expect(page.locator(".planet.stage")).toContainText("Movimento, presença e narrativa.");
+  await expect(page.locator("#lang")).toHaveText("EN");
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt");
+});
+
+test("Portuguese browsers get Portuguese first", async ({ browser }) => {
+  const ctx = await browser.newContext({ locale: "pt-PT" });
+  const page = await ctx.newPage();
+  await page.goto("/");
+  await expect(page.locator(".planet.qa")).toContainText("Qualidade de software");
+  await ctx.close();
+});
+
+test("the page fits the screen: no stray vertical scroll on desktop", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "phones scroll the planet list on purpose");
+  await page.goto("/");
+  const extra = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  expect(extra).toBeLessThanOrEqual(0);
 });

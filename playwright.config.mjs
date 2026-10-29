@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-// desktop + phone test this checkout; "live" checks the four real sites.
+// desktop + phone test this checkout; "live" checks the five real sites.
 export default defineConfig({
   testDir: "tests",
   retries: process.env.CI ? 1 : 0,

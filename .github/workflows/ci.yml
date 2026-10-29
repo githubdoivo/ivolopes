@@ -22,7 +22,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm test
   live:
-    name: The four live sites
+    name: The five live sites
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

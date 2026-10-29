@@ -74,10 +74,22 @@ header {
 .brand h1 { font: 500 clamp(26px, 2.6vw, 34px)/1 var(--serif); letter-spacing: .005em; }
 .brand small { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
 
+/* Language switch: a small glass pill, like the planet cards */
+.lang {
+  font: 600 13px/1 var(--cond); letter-spacing: .14em; color: var(--ink); cursor: pointer;
+  background: var(--glass); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px;
+  padding: 9px 14px 8px; min-height: 36px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  transition: background .3s, border-color .3s;
+}
+.lang:hover { background: var(--glass-hi); border-color: var(--ink-soft); }
+.lang:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media (pointer: coarse) { .lang { min-height: 44px; min-width: 52px; } }
+
 /* The system: a fixed 16:10 board, scaled to fit the window. */
 main { display: grid; place-items: center; padding: 8px 12px 28px; }
 .system {
-  --w: min(1320px, 92vw, calc((100svh - 120px) * 1.6));
+  --w: min(1320px, 92vw, calc((100svh - 140px) * 1.6));
   position: relative; width: var(--w); aspect-ratio: 16 / 10;
 }
 .orbits { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
@@ -130,7 +142,6 @@ main { display: grid; place-items: center; padding: 8px 12px 28px; }
 .label strong { display: flex; align-items: center; gap: 10px; font: 600 clamp(19px, 1.9vw, 26px)/1 var(--cond); letter-spacing: .06em; color: var(--c); text-shadow: 0 0 18px color-mix(in srgb, var(--c) 40%, transparent); }
 .label strong svg { width: .8em; height: .8em; transition: translate .3s; }
 .label span { display: block; margin-top: 6px; font-size: 13.5px; color: var(--ink-soft); }
-.label .soon-tag { display: inline-block; margin: 0 0 0 2px; font: 500 10.5px var(--cond); letter-spacing: .16em; text-transform: uppercase; border: 1px solid currentColor; border-radius: 999px; padding: 1px 8px; color: var(--stage); vertical-align: 1px; }
 
 a.planet:hover img, a.planet:focus-visible img { transform: scale(1.06); }
 .sun:hover img, .sun:focus-visible img { transform: scale(1.03); }
@@ -142,7 +153,6 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 .art { --x: 68.9; --y: 19.5; --d: 12.4; --disc: 96.5%; --c: var(--art); --f: 10s; --fd: -3s; }
 .moss { --x: 18.0; --y: 78.1; --d: 15.6; --disc: 86.5%; --c: var(--moss); --f: 11s; --fd: -6s; }
 .stage { --x: 95.1; --y: 69.3; --d: 13.4; --disc: 98.7%; --c: var(--stage); --f: 9.5s; --fd: -2s; }
-.stage { cursor: default; }
 .stage .label { max-width: 14.5em; }
 
 /* Entrance */
@@ -189,8 +199,9 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
   <div class="brand">
     <svg class="spark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 0c.6 8.5 2.3 14.2 16 16-13.7 1.8-15.4 7.5-16 16-.6-8.5-2.3-14.2-16-16 13.7-1.8 15.4-7.5 16-16z"/></svg>
     <h1>Ivo Lopes</h1>
-    <small>Different orbits, same universe.</small>
+    <small data-t="tagline">Different orbits, same universe.</small>
   </div>
+  <button class="lang" id="lang" type="button" lang="pt" aria-label="Ver em português">PT</button>
 </header>
 
 <main>
@@ -222,22 +233,54 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 
     <a class="body planet qa below" href="https://qa.ivolopes.com">
       <div class="ball"><img src="assets/qa.webp" alt="" width="358" height="358"></div>
-      <span class="label"><strong>QA <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span>Software quality, tested with care.</span></span>
+      <span class="label"><strong>QA <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span data-t="qa">Software quality, tested with care.</span></span>
     </a>
     <a class="body planet art right" href="https://art.ivolopes.com">
       <div class="ball"><img src="assets/art.webp" alt="" width="372" height="372"></div>
-      <span class="label"><strong>ART <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span>Handmade ceramics in clay and time.</span></span>
+      <span class="label"><strong>ART <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span data-t="art">Handmade ceramics in clay and time.</span></span>
     </a>
     <a class="body planet moss right" href="https://moss.ivolopes.com">
       <div class="ball"><img src="assets/moss.webp" alt="" width="456" height="456"></div>
-      <span class="label"><strong>MOSS <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span>Music for inner worlds.</span></span>
+      <span class="label"><strong>MOSS <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span data-t="moss">Music for inner worlds.</span></span>
     </a>
-    <div class="body planet stage left" tabindex="0">
+    <a class="body planet stage left" href="https://stage.ivolopes.com">
       <div class="ball"><img src="assets/stage.webp" alt="" width="436" height="436"></div>
-      <span class="label"><strong>STAGE <span class="soon-tag">Soon</span></strong><span>Movement, presence and storytelling.</span></span>
-    </div>
+      <span class="label"><strong>STAGE <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></strong><span data-t="stage">Movement, presence and storytelling.</span></span>
+    </a>
   </div>
 </main>
+
+<!-- English or Portuguese: the visitor's choice, else the browser's language. -->
+<script>
+(function () {
+  var T = {
+    en: { tagline: "Different orbits, same universe.", qa: "Software quality, tested with care.", art: "Handmade ceramics in clay and time.",
+          moss: "Music for inner worlds.", stage: "Movement, presence and storytelling.", mail: "Email Ivo Lopes",
+          other: "PT", otherLang: "pt", otherLabel: "Ver em português" },
+    pt: { tagline: "Órbitas diferentes, o mesmo universo.", qa: "Qualidade de software, testada com cuidado.", art: "Cerâmica feita à mão, em barro e tempo.",
+          moss: "Música para mundos interiores.", stage: "Movimento, presença e narrativa.", mail: "Enviar email para Ivo Lopes",
+          other: "EN", otherLang: "en", otherLabel: "View in English" }
+  };
+  var q = new URLSearchParams(location.search).get("lang"), saved = null;
+  try { saved = localStorage.getItem("lang"); } catch (_) {}
+  var lang = q || saved || ((navigator.language || "").toLowerCase().indexOf("pt") === 0 ? "pt" : "en");
+  if (!T[lang]) lang = "en";
+  function apply() {
+    var t = T[lang];
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = t[el.dataset.t]; });
+    document.querySelector(".sun").setAttribute("aria-label", t.mail);
+    var b = document.getElementById("lang");
+    b.textContent = t.other; b.lang = t.otherLang; b.setAttribute("aria-label", t.otherLabel);
+  }
+  apply();
+  document.getElementById("lang").addEventListener("click", function () {
+    lang = lang === "pt" ? "en" : "pt";
+    try { localStorage.setItem("lang", lang); } catch (_) {}
+    apply();
+  });
+})();
+</script>
 
 <!-- Cloudflare Web Analytics: cookie-free, on the real domain only. -->
 <script>

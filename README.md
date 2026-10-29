@@ -9,7 +9,7 @@ shared contact is mail@ivolopes.com.
 | QA (CV) | qa.ivolopes.com | githubdoivo/qa |
 | Art (ceramics) | art.ivolopes.com | githubdoivo/art |
 | MOSS (DJ, producer) | moss.ivolopes.com | githubdoivo/moss |
-| Stage (dance, acting) | stage.ivolopes.com | soon |
+| Stage (dance, acting) | stage.ivolopes.com | githubdoivo/stage |
 
 `index.html` is the solar system: the sun is the Contact link (mail), and the
 planets are the areas. Images in `assets/` come from a ChatGPT mockup (sky,

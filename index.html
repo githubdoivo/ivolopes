@@ -18,7 +18,7 @@
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#1d3a5c">
+<meta name="theme-color" content="#22486a">
 <!-- The page has its own look: ask dark-mode extensions and forced-dark browsers to leave it alone. -->
 <meta name="color-scheme" content="only light">
 <meta name="darkreader-lock">
@@ -41,7 +41,9 @@
   --cond: "Barlow Semi Condensed", "Avenir Next Condensed", system-ui, sans-serif;
   --sans: "Inter", system-ui, sans-serif;
 }
-html { overscroll-behavior-y: none; background: #f1c79c linear-gradient(#22486a, #5b7f9a 45%, #f1c79c); }  /* the sky's colours, until the image loads */
+/* The base colour is the sky's top colour: iPhone Safari paints the status bar and any
+   gap with it, so a peach base showed as a peach bar above a blue sky */
+html { overscroll-behavior-y: none; background: #22486a linear-gradient(#22486a, #5b7f9a 45%, #f1c79c); }
 body {
   min-height: 100vh; min-height: 100svh;
   color: var(--ink); font: 15px/1.45 var(--sans);
@@ -49,12 +51,12 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 
-/* Sky: the one painted background. It holds still, and it is sized to the
-   tallest the screen can get (100lvh), so no edge shows when a phone's
-   browser bars slide away. */
+/* Sky: the one painted background. It holds still and reaches well past every
+   edge of the screen, so no edge shows behind a phone's browser bars, however
+   they float, slide or bounce. */
 .sky {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 100vh; height: 100lvh;
+  position: fixed; top: -160px; left: 0; right: 0;
+  height: calc(100vh + 320px); height: calc(100lvh + 320px);
   background: url(assets/sky.webp) center 40% / cover no-repeat;
   z-index: -2;
 }

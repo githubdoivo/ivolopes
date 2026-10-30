@@ -94,7 +94,7 @@ test("the sky holds still and always covers the whole screen", async ({ page }) 
     expect(sky.bottom).toBeGreaterThanOrEqual(vp.height);
     expect(sky.t).toBe("none");
     expect(sky.anim).toBe(0);
-    await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+    await page.evaluate(() => { const pg = document.querySelector(".page"); pg.scrollTo(0, pg.scrollHeight); });
     const after = await page.locator(".sky").evaluate((el) => el.getBoundingClientRect().bottom);
     expect(after, `bottom after scrolling at ${vp.width}`).toBeGreaterThanOrEqual(vp.height);
   }
@@ -123,6 +123,13 @@ test("Portuguese browsers get Portuguese first", async ({ browser }) => {
 test("the page fits the screen: no stray vertical scroll on desktop", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop", "phones scroll the planet list on purpose");
   await page.goto("/");
-  const extra = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  const extra = await page.evaluate(() => { const pg = document.querySelector(".page"); return pg.scrollHeight - pg.clientHeight; });
   expect(extra).toBeLessThanOrEqual(0);
+});
+
+test("nothing is pinned to the screen edges (iPhone Safari would paint a solid band over it)", async ({ page }) => {
+  await page.goto("/");
+  const pinned = await page.evaluate(() => [...document.querySelectorAll("body *")].filter((el) => ["fixed", "sticky"].includes(getComputedStyle(el).position)).map((el) => el.className));
+  expect(pinned).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(0);
 });

@@ -44,21 +44,25 @@
 /* The base colour is the sky's top colour: iPhone Safari paints the status bar and any
    gap with it, so a peach base showed as a peach bar above a blue sky */
 html { overscroll-behavior-y: none; background: #22486a linear-gradient(#22486a, #5b7f9a 45%, #f1c79c); }
-body {
-  min-height: 100vh; min-height: 100svh;
-  color: var(--ink); font: 15px/1.45 var(--sans);
-  overflow-x: hidden;
+/* The window itself never scrolls; .page scrolls over a still sky. iPhone Safari (iOS 26)
+   paints a solid band over anything pinned to the top or bottom of the screen, so the sky
+   is not pinned (no position: fixed) and nothing else is either. */
+html, body { height: 100%; overflow: hidden; }
+body { color: var(--ink); font: 15px/1.45 var(--sans); }
+.page {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 1;
+  height: 100vh; height: 100lvh;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: none;
 }
 a { color: inherit; text-decoration: none; }
 
-/* Sky: the one painted background. It holds still and reaches well past every
-   edge of the screen, so no edge shows behind a phone's browser bars, however
-   they float, slide or bounce. */
+/* Sky: the one painted background. It holds still (only .page scrolls) and reaches
+   well past every edge of the screen, so no edge shows behind a phone's browser bars. */
 .sky {
-  position: fixed; top: -160px; left: 0; right: 0;
-  height: calc(100vh + 320px); height: calc(100lvh + 320px);
+  position: absolute; top: -160px; left: 0; right: 0;
+  height: calc(100vh + 160px); height: calc(100lvh + 160px);
   background: url(assets/sky.webp) center 40% / cover no-repeat;
-  z-index: -2;
+  z-index: 0;
 }
 .sky::after { /* darker top edge so the header always reads */
   content: ""; position: absolute; inset: 0;
@@ -170,7 +174,7 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 @media (max-width: 760px), (max-aspect-ratio: 4/5) {
   .sky { background-position: 46% 30%; }
   header { padding: 18px 20px 0; }
-  main { padding: 6px 20px 40px; overflow-x: clip; }
+  main { padding: 6px 20px 40px; padding-bottom: calc(40px + 100lvh - 100svh); overflow-x: clip; }
   .system { --w: 100%; aspect-ratio: auto; width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
   .orbits { display: none; }
   .system::before { /* the line every planet hangs on */
@@ -196,6 +200,7 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
 </head>
 <body>
 <div class="sky" aria-hidden="true"></div>
+<div class="page">
 
 <header>
   <div class="brand">
@@ -251,6 +256,7 @@ a.planet:hover .label strong svg, a.planet:focus-visible .label strong svg { tra
     </a>
   </div>
 </main>
+</div>
 
 <!-- English or Portuguese: the visitor's choice, else the browser's language. -->
 <script>
